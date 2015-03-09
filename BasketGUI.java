@@ -1,4 +1,6 @@
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.ResultSet;
@@ -14,7 +16,6 @@ public class BasketGUI {
     private JPanel panel1;
     private JPanel inventoryTab;
     private JPanel orderTab;
-    private JList inventoryList;
     private JTextField firstNameField;
     private JTextField lastNameField;
     private JTextField emailField;
@@ -26,6 +27,7 @@ public class BasketGUI {
     private JList customerList;
     private JTextField customerField;
     private JTextField cityField;
+    private JTable itemTable;
 
     public BasketGUI() {
 
@@ -46,17 +48,15 @@ public class BasketGUI {
             Statement statement = connection.createStatement();
             results = statement.executeQuery(sqlQuery);
         }catch(SQLException ex){
-            System.out.println(ex);
+            JOptionPane.showMessageDialog(null, ex.getMessage());
             results = null;
         }
         return results;
     }
 
     private void addCustomer(){
-        String updateQuery = "insert into customers (customerid, firstname, lastname, password)" +
-                                " values ("+
-                                    "'" + customerField.getText() +
-                                    "', '" + firstNameField.getText() +
+        String updateQuery = "insert into customers (firstname, lastname, password)" +
+                                " values ('" + firstNameField.getText() +
                                     "', '" + lastNameField.getText() +
                                     "', '" + passwordField.getText() +
                                 "')";
@@ -70,7 +70,7 @@ public class BasketGUI {
             while (customerResults.next())
                 customerModel.addElement(customerResults.getString("firstname") + " " + customerResults.getString("lastname"));
         }catch(SQLException e){
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e.getMessage());
         }
         customerList.setModel(customerModel);
     }
@@ -81,16 +81,19 @@ public class BasketGUI {
         frame.setContentPane(gui.panel1);
         ResultSet inventoryResults = getResultsFromQuery("select * from item");
 
-        DefaultListModel inventoryModel = new DefaultListModel();
+        DefaultTableModel inventoryModel = new DefaultTableModel();
+        inventoryModel.addColumn("Item name");
+        inventoryModel.addColumn("Price");
 
         try {
-            while (inventoryResults.next())
-                inventoryModel.addElement(inventoryResults.getString("itemname") + " - $" + inventoryResults.getDouble("price"));
-
+            while (inventoryResults.next()) {
+                String[] rowData = {inventoryResults.getString("itemname"), "$" + inventoryResults.getDouble("price")};
+                inventoryModel.addRow(rowData);
+            }
         }catch(SQLException e){
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e.getMessage());
         }
-        gui.inventoryList.setModel(inventoryModel);
+        gui.itemTable.setModel(inventoryModel);
 
         ResultSet customerResults = getResultsFromQuery("select * from customers");
         DefaultListModel customerModel = new DefaultListModel();
@@ -98,11 +101,12 @@ public class BasketGUI {
             while (customerResults.next())
                 customerModel.addElement(customerResults.getString("firstname") + " " + customerResults.getString("lastname"));
         }catch(SQLException e){
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e.getMessage());
         }
         gui.customerList.setModel(customerModel);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setPreferredSize(new Dimension(800,600));
         frame.pack();
         frame.setVisible(true);
     }

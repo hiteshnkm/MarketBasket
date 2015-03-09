@@ -24,6 +24,7 @@ public class Connection {
         connectionProps.put("password", password);
 
         try {
+            DriverManager.setLoginTimeout(300);
             conn = DriverManager.getConnection(
                     "jdbc:oracle:thin:@" + hostName + ":" + dbName,
                     connectionProps);
