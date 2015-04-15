@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.sql.*;
 import java.util.Properties;
 
@@ -22,6 +23,8 @@ public class Connection {
         Properties connectionProps = new Properties();
         connectionProps.put("user", userName);
         connectionProps.put("password", password);
+        // Display a splash screen, while we connect to the database
+        JFrame messageFrame = createLoadingFrame("Connecting to database...");
 
         try {
             DriverManager.setLoginTimeout(300);
@@ -29,15 +32,29 @@ public class Connection {
                     "jdbc:oracle:thin:@" + hostName + ":" + dbName,
                     connectionProps);
         } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error connecting to database", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
-
+        messageFrame.dispose();
         System.out.println("Connected to database");
         return conn;
     }
 
     public static java.sql.Connection getConnection(){
         return ConnectionHolder.CONN;
+    }
+
+    private static JFrame createLoadingFrame(String message) {
+        JFrame messageFrame = new JFrame();
+        messageFrame.getContentPane().add(new JLabel(message));
+
+        messageFrame.setUndecorated(true);
+        messageFrame.getRootPane().setWindowDecorationStyle(JRootPane.NONE);
+
+        messageFrame.setSize(250, 100);
+        messageFrame.setLocationRelativeTo(null);
+        messageFrame.setVisible(true);
+        return messageFrame;
     }
 
 }
