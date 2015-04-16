@@ -12,13 +12,13 @@ public class Customer {
     private String middleInit;
     private String lastName;
     private String email;
-    private int phoneNumber;
+    private long phoneNumber;
     private int age;
     private String company;
     private String receiveNotification;
 
     public Customer(int id, String fName, String middleInitial, String lName, String email,
-                    int phoneNum, int age, String company, String receiveNotification) {
+                    long phoneNum, int age, String company, String receiveNotification) {
         this.customerID = id;
         this.firstName = fName;
         this.middleInit = middleInitial;
@@ -48,7 +48,7 @@ public class Customer {
             String middleInit;
             String lastName;
             String email;
-            int phoneNum;
+            long phoneNum;
             int age;
             String company;
             String notif;
@@ -58,7 +58,7 @@ public class Customer {
                 middleInit = user.getString("MIDDLEINIT");
                 lastName = user.getString("LASTNAME");
                 email = user.getString("EMAIL");
-                phoneNum = user.getInt("PHONENUMBER");
+                phoneNum = user.getLong("PHONENUMBER");
                 age = user.getInt("AGE");
                 company = user.getString("COMPANY");
                 notif = user.getString("RECEIVENOTIF");

@@ -51,12 +51,13 @@ public class BasketGUI {
     }
 
     private void checkIfCustomer(String text, char[] password) {
-        String userQuery = "SELECT * FROM CUSTOMERS WHERE EMAIL = ? AND PASSWORD=  ?";
+        String userQuery = "SELECT * FROM CUSTOMERS WHERE EMAIL = ? AND PASSWORD = ?";
         ResultSet user = getResultsFromQuery(userQuery, text, String.valueOf(password));
         Customer loggedInCustomer = Customer.createCustomerFromQuery(user);
         if (loggedInCustomer == null) {
             JOptionPane.showMessageDialog(null, "Invalid login information.", "Could not login.", JOptionPane.ERROR_MESSAGE);
         }
+
     }
 
     private static ResultSet getResultsFromQuery(String sqlQuery, String... args){
@@ -69,8 +70,6 @@ public class BasketGUI {
                 int index = i + 1;
                 statement.setString(index, args[i]);
             }
-            statement.executeUpdate();
-
             results = statement.executeQuery();
         }catch(SQLException ex){
             JOptionPane.showMessageDialog(null, ex.getMessage());
@@ -94,7 +93,7 @@ public class BasketGUI {
         try {
             while (customerResults.next())
                 customerModel.addElement(customerResults.getString("firstname") + " " + customerResults.getString("lastname"));
-        }catch(SQLException e){
+        } catch(SQLException e){
             JOptionPane.showMessageDialog(null, e.getMessage());
         }
         customerList.setModel(customerModel);
