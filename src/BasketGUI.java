@@ -3,6 +3,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -28,6 +29,9 @@ public class BasketGUI {
     private JTextField customerField;
     private JTextField cityField;
     private JTable itemTable;
+    private JTextField usernameField;
+    private JPasswordField loginPasswordField;
+    private JButton loginButton;
 
     public BasketGUI() {
 
@@ -38,15 +42,36 @@ public class BasketGUI {
                 reloadCustomerList();
             }
         });
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                checkIfCustomer(usernameField.getText(), loginPasswordField.getPassword());
+            }
+        });
     }
 
-    private static ResultSet getResultsFromQuery(String sqlQuery){
-        DefaultListModel listModel = new DefaultListModel();
+    private void checkIfCustomer(String text, char[] password) {
+        String userQuery = "SELECT * FROM CUSTOMERS WHERE EMAIL = ? AND PASSWORD=  ?";
+        ResultSet user = getResultsFromQuery(userQuery, text, String.valueOf(password));
+        Customer loggedInCustomer = Customer.createCustomerFromQuery(user);
+        if (loggedInCustomer == null) {
+            JOptionPane.showMessageDialog(null, "Invalid login information.", "Could not login.", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static ResultSet getResultsFromQuery(String sqlQuery, String... args){
         java.sql.Connection connection = Connection.getConnection();
         ResultSet results;
         try {
-            Statement statement = connection.createStatement();
-            results = statement.executeQuery(sqlQuery);
+            PreparedStatement statement = connection.prepareStatement(sqlQuery, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            // Add all of the arguments to the sql query
+            for (int i = 0; i < args.length; i++) {
+                int index = i + 1;
+                statement.setString(index, args[i]);
+            }
+            statement.executeUpdate();
+
+            results = statement.executeQuery();
         }catch(SQLException ex){
             JOptionPane.showMessageDialog(null, ex.getMessage());
             results = null;
