@@ -37,6 +37,8 @@ public class BasketGUI {
         String userQuery = "SELECT * FROM CUSTOMERS WHERE EMAIL = ? AND PASSWORD = ?";
         ResultSet user = Connection.getResultsFromQuery(userQuery, text, String.valueOf(password));
         Customer loggedInCustomer = Customer.createCustomerFromQuery(user);
+        Connection.setLoggedInCustomer(loggedInCustomer);
+
         if (loggedInCustomer == null) {
             JOptionPane.showMessageDialog(null, "Invalid login information.", "Could not login.", JOptionPane.ERROR_MESSAGE);
         }else {
@@ -57,27 +59,6 @@ public class BasketGUI {
         tabPane.repaint();
     }
 
-    private void addCustomer(){
-        String updateQuery = "insert into customers (firstname, lastname, password)" +
-                                " values ('" + firstNameField.getText() +
-                                    "', '" + lastNameField.getText() +
-                                    "', '" + passwordField.getText() +
-                                "')";
-        Connection.getResultsFromQuery(updateQuery);
-    }
-
-    private void reloadCustomerList(){
-        ResultSet customerResults = Connection.getResultsFromQuery("select * from customers");
-        DefaultListModel customerModel = new DefaultListModel();
-        try {
-            while (customerResults.next())
-                customerModel.addElement(customerResults.getString("firstname") + " " + customerResults.getString("lastname"));
-        } catch(SQLException e){
-            JOptionPane.showMessageDialog(null, e.getMessage());
-        }
-        customerList.setModel(customerModel);
-    }
-
     public static void main(String[] args) {
         BasketGUI gui = new BasketGUI();
         JFrame frame = new JFrame("BasketGUI");
@@ -93,16 +74,6 @@ public class BasketGUI {
         gui.itemTable.getColumn("Details").setCellRenderer(buttonRenderer);
         gui.itemTable.getColumn("Buy Now").setCellRenderer(buttonRenderer);
         gui.itemTable.addMouseListener(new JTableButtonMouseListener(gui.itemTable));
-
-        ResultSet customerResults = Connection.getResultsFromQuery("select * from customers");
-        DefaultListModel customerModel = new DefaultListModel();
-        try {
-            while (customerResults.next())
-                customerModel.addElement(customerResults.getString("firstname") + " " + customerResults.getString("lastname"));
-        }catch(SQLException e){
-            JOptionPane.showMessageDialog(null, e.getMessage());
-        }
-        gui.customerList.setModel(customerModel);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(625, 310));
@@ -148,14 +119,6 @@ public class BasketGUI {
     private JPanel inventoryTab;
     private JPanel Orders;
     private JScrollPane ordersTable;
-    private JTextField firstNameField;
-    private JTextField lastNameField;
-    private JTextField emailField;
-    private JTextField addressField;
-    private JTextField stateField;
-    private JTextField countryField;
-    private JPasswordField passwordField;
-    private JList customerList;
     private JTextField customerField;
     private JTextField cityField;
     private JTable itemTable;

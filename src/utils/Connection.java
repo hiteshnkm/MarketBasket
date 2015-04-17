@@ -1,5 +1,6 @@
 package utils;
 
+import models.Customer;
 import models.Item;
 
 import javax.swing.*;
@@ -17,6 +18,7 @@ public class Connection {
     private static String password = "marketbasket";
     private static String dbName = "MRKTBSKT";
     private static String hostName = "oracle-sql-server.c5axgu5gzr3g.us-west-2.rds.amazonaws.com:1521";
+    private static Customer loggedInCustomer;
 
     static class ConnectionHolder{
 
@@ -93,10 +95,21 @@ public class Connection {
             int quantity = inventoryResults.getInt("quantity");
 
             return new Item(itemid, itemname, description, category, price, quantity);
-        } catch(SQLException e){
+        } catch(SQLException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error loading items from database.", JOptionPane.ERROR_MESSAGE);
             return null;
         }
     }
 
+    public static Customer getLoggedInCustomer() {
+        return loggedInCustomer;
+    }
+
+    public static void setLoggedInCustomer(Customer loggedInCustomer) {
+        Connection.loggedInCustomer = loggedInCustomer;
+    }
+
+    public static void placeOrder(Item rowItem) {
+        Customer currentCustomer = getLoggedInCustomer();
+    }
 }

@@ -1,3 +1,4 @@
+import models.Customer;
 import models.Item;
 import utils.Connection;
 
@@ -66,7 +67,9 @@ public class InventoryTable  extends AbstractTableModel {
                     public void actionPerformed(ActionEvent arg0) {
                         ItemDetail dialog = new ItemDetail(rowItem);
                         dialog.pack();
+                        dialog.setLocationRelativeTo(JOptionPane.getFrameForComponent(detail_button));
                         dialog.setVisible(true);
+                        System.out.println("I made it here.");
                     }
                 });
                 return detail_button;
@@ -74,17 +77,14 @@ public class InventoryTable  extends AbstractTableModel {
                 final JButton buy_button = new JButton(COLUMN_NAMES[columnIndex]);
                 buy_button.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
+                        Connection.placeOrder(rowItem);
                         JOptionPane.showMessageDialog(JOptionPane.getFrameForComponent(buy_button),
                                 "Buy " + rowItem.getItemName());
-                        displayItemDetails();
                     }
                 });
                 return buy_button;
             default:
                 return "Error";
         }
-    }
-
-    private void displayItemDetails(){
     }
 }
