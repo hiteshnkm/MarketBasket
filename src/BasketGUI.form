@@ -152,7 +152,7 @@
                   <color color="-4473925"/>
                 </border>
                 <children>
-                  <component id="c0df0" class="javax.swing.JTable" binding="table1" default-binding="true">
+                  <component id="c0df0" class="javax.swing.JTable" binding="orderTable">
                     <constraints/>
                     <properties/>
                   </component>

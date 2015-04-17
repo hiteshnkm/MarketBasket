@@ -25,13 +25,6 @@ public class BasketGUI {
         // Make items in item table not draggable
         itemTable.getTableHeader().setReorderingAllowed(false);
 
-        addCustomerButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                addCustomer();
-                reloadCustomerList();
-            }
-        });
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -153,7 +146,8 @@ public class BasketGUI {
     private JTabbedPane tabPane;
     private JPanel panel1;
     private JPanel inventoryTab;
-    private JPanel orderTab;
+    private JPanel Orders;
+    private JScrollPane ordersTable;
     private JTextField firstNameField;
     private JTextField lastNameField;
     private JTextField emailField;
@@ -161,7 +155,6 @@ public class BasketGUI {
     private JTextField stateField;
     private JTextField countryField;
     private JPasswordField passwordField;
-    private JButton addCustomerButton;
     private JList customerList;
     private JTextField customerField;
     private JTextField cityField;
@@ -171,6 +164,7 @@ public class BasketGUI {
     private JButton loginButton;
     private JButton logoutButton;
     private JPanel homePanel;
+    private JTable orderTable;
     private HomeScreen homeScreen;
 
     // Other variables
