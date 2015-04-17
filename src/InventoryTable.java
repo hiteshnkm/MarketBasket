@@ -16,12 +16,12 @@ import java.util.ArrayList;
  */
 public class InventoryTable  extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
-    private static final String[] COLUMN_NAMES = new String[] {"ItemName", "Price", "DetailsButton", "BuyButton"};
+    private static final String[] COLUMN_NAMES = new String[] {"Item Name", "Price", "Details", "Buy Now"};
     private static final Class<?>[] COLUMN_TYPES = new Class<?>[] {String.class, Long.class, JButton.class,  JButton.class};
     private static ArrayList<Item> itemList = new ArrayList<Item>();
+    private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
 
     public InventoryTable(){
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
         ResultSet inventoryResults = Connection.getResultsFromQuery("select * from item");
 
         try {
@@ -59,27 +59,32 @@ public class InventoryTable  extends AbstractTableModel {
             case 0:
                 return rowItem.getItemName();
             case 1:
-                return rowItem.getPrice();
+                return currencyFormat.format(rowItem.getPrice());
             case 2:
-                final JButton detail_button = new JButton("Details");
+                final JButton detail_button = new JButton(COLUMN_NAMES[columnIndex]);
                 detail_button.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
-                        JOptionPane.showMessageDialog(JOptionPane.getFrameForComponent(detail_button),
-                                "Details for " + rowItem.getItemName());
+                        ItemDetail dialog = new ItemDetail(rowItem);
+                        dialog.pack();
+                        dialog.setVisible(true);
                     }
                 });
                 return detail_button;
             case 3:
-                final JButton buy_button = new JButton("Buy");
+                final JButton buy_button = new JButton(COLUMN_NAMES[columnIndex]);
                 buy_button.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
                         JOptionPane.showMessageDialog(JOptionPane.getFrameForComponent(buy_button),
                                 "Buy " + rowItem.getItemName());
+                        displayItemDetails();
                     }
                 });
                 return buy_button;
             default:
                 return "Error";
         }
+    }
+
+    private void displayItemDetails(){
     }
 }

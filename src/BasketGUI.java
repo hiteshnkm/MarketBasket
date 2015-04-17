@@ -97,8 +97,8 @@ public class BasketGUI {
         gui.itemTable.setRowHeight(20);
 
         JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
-        gui.itemTable.getColumn("DetailsButton").setCellRenderer(buttonRenderer);
-        gui.itemTable.getColumn("BuyButton").setCellRenderer(buttonRenderer);
+        gui.itemTable.getColumn("Details").setCellRenderer(buttonRenderer);
+        gui.itemTable.getColumn("Buy Now").setCellRenderer(buttonRenderer);
         gui.itemTable.addMouseListener(new JTableButtonMouseListener(gui.itemTable));
 
         ResultSet customerResults = Connection.getResultsFromQuery("select * from customers");
