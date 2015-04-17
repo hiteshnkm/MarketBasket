@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.sql.*;
 import java.util.Properties;
 
@@ -46,7 +47,10 @@ public class Connection {
 
     private static JFrame createLoadingFrame(String message) {
         JFrame messageFrame = new JFrame();
-        messageFrame.getContentPane().add(new JLabel(message));
+        JPanel panel = (JPanel) messageFrame.getContentPane();
+        panel.setBorder(new EmptyBorder(10,10,10,10));
+        JLabel messageLabel = new JLabel(message);
+        panel.add(messageLabel);
 
         messageFrame.setUndecorated(true);
         messageFrame.getRootPane().setWindowDecorationStyle(JRootPane.NONE);

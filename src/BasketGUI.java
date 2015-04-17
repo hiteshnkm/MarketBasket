@@ -32,6 +32,9 @@ public class BasketGUI {
     private JTextField usernameField;
     private JPasswordField loginPasswordField;
     private JButton loginButton;
+    private JButton logoutButton;
+    private JPanel homePanel;
+    private HomeScreen homeScreen;
 
     public BasketGUI() {
 
@@ -45,19 +48,33 @@ public class BasketGUI {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                checkIfCustomer(usernameField.getText(), loginPasswordField.getPassword());
+                login(usernameField.getText(), loginPasswordField.getPassword());
             }
         });
     }
 
-    private void checkIfCustomer(String text, char[] password) {
+    private void login(String text, char[] password) {
         String userQuery = "SELECT * FROM CUSTOMERS WHERE EMAIL = ? AND PASSWORD = ?";
         ResultSet user = getResultsFromQuery(userQuery, text, String.valueOf(password));
         Customer loggedInCustomer = Customer.createCustomerFromQuery(user);
         if (loggedInCustomer == null) {
             JOptionPane.showMessageDialog(null, "Invalid login information.", "Could not login.", JOptionPane.ERROR_MESSAGE);
+        }else {
+            homeScreen = new HomeScreen(loggedInCustomer);
+            logoutButton = homeScreen.getLogoutButton();
+            logoutButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    logout();
+                }
+            });
+            tabPane.setComponentAt(0, homeScreen.getMainPanel());
         }
+    }
 
+    private void logout() {
+        tabPane.setComponentAt(0, homePanel);
+        tabPane.repaint();
     }
 
     private static ResultSet getResultsFromQuery(String sqlQuery, String... args){
@@ -130,7 +147,7 @@ public class BasketGUI {
         gui.customerList.setModel(customerModel);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(800,600));
+        frame.setPreferredSize(new Dimension(625,310));
         frame.pack();
         frame.setVisible(true);
     }
