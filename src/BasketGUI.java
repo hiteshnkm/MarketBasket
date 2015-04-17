@@ -1,4 +1,5 @@
 import models.Customer;
+import models.Item;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,34 +9,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 
 /**
  * William Trent Holliday
  * 1/30/15
  */
 public class BasketGUI {
-    private JTabbedPane tabPane;
-    private JPanel panel1;
-    private JPanel inventoryTab;
-    private JPanel orderTab;
-    private JTextField firstNameField;
-    private JTextField lastNameField;
-    private JTextField emailField;
-    private JTextField addressField;
-    private JTextField stateField;
-    private JTextField countryField;
-    private JPasswordField passwordField;
-    private JButton addCustomerButton;
-    private JList customerList;
-    private JTextField customerField;
-    private JTextField cityField;
-    private JTable itemTable;
-    private JTextField usernameField;
-    private JPasswordField loginPasswordField;
-    private JButton loginButton;
-    private JButton logoutButton;
-    private JPanel homePanel;
-    private HomeScreen homeScreen;
 
     public BasketGUI() {
         // Make items in item table not draggable
@@ -131,12 +111,16 @@ public class BasketGUI {
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
         try {
             while (inventoryResults.next()) {
-                String[] rowData = {inventoryResults.getString("itemname"), currencyFormat.format(inventoryResults.getDouble("price"))};
-                inventoryModel.addRow(rowData);
+                Item dbItem = createItemFromQuery(inventoryResults);
+                if(dbItem != null) {
+                    String[] rowData = {dbItem.getItemName(), currencyFormat.format(dbItem.getPrice())};
+                    inventoryModel.addRow(rowData);
+                }
             }
-        }catch(SQLException e){
-            JOptionPane.showMessageDialog(null, e.getMessage());
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
         gui.itemTable.setModel(inventoryModel);
 
         ResultSet customerResults = getResultsFromQuery("select * from customers");
@@ -154,4 +138,47 @@ public class BasketGUI {
         frame.pack();
         frame.setVisible(true);
     }
+
+    private static Item createItemFromQuery(ResultSet inventoryResults) {
+        try {
+            Long itemid = inventoryResults.getLong("itemid");
+            String itemname = inventoryResults.getString("itemname");
+            String description = inventoryResults.getString("description");
+            String category = inventoryResults.getString("category_type");
+            Double price = inventoryResults.getDouble("price");
+            int quantity = inventoryResults.getInt("quantity");
+
+            return new Item(itemid, itemname, description, category, price, quantity);
+        } catch(SQLException e){
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error loading items from database.", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+    }
+
+    // GUI variables
+    private JTabbedPane tabPane;
+    private JPanel panel1;
+    private JPanel inventoryTab;
+    private JPanel orderTab;
+    private JTextField firstNameField;
+    private JTextField lastNameField;
+    private JTextField emailField;
+    private JTextField addressField;
+    private JTextField stateField;
+    private JTextField countryField;
+    private JPasswordField passwordField;
+    private JButton addCustomerButton;
+    private JList customerList;
+    private JTextField customerField;
+    private JTextField cityField;
+    private JTable itemTable;
+    private JTextField usernameField;
+    private JPasswordField loginPasswordField;
+    private JButton loginButton;
+    private JButton logoutButton;
+    private JPanel homePanel;
+    private HomeScreen homeScreen;
+
+    // Other variables
+    private static ArrayList<Item> itemList = new ArrayList<Item>();
 }
