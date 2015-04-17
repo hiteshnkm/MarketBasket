@@ -3,6 +3,8 @@ import models.Item;
 import utils.Connection;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -91,6 +93,9 @@ public class BasketGUI {
         InventoryTable inventoryModel = new InventoryTable();
         gui.itemTable.setModel(inventoryModel);
 
+        gui.itemTable.setIntercellSpacing(new Dimension(5,5));
+        gui.itemTable.setRowHeight(20);
+
         JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
         gui.itemTable.getColumn("DetailsButton").setCellRenderer(buttonRenderer);
         gui.itemTable.getColumn("BuyButton").setCellRenderer(buttonRenderer);
@@ -107,14 +112,16 @@ public class BasketGUI {
         gui.customerList.setModel(customerModel);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(625,310));
+        frame.setPreferredSize(new Dimension(625, 310));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
-    private static class JTableButtonRenderer implements TableCellRenderer {
+    private static class JTableButtonRenderer extends DefaultTableCellRenderer {
         @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
+                    row, column);
             JButton button = (JButton)value;
             return button;
         }
