@@ -1,12 +1,13 @@
+import models.Customer;
+
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.text.NumberFormat;
 
 /**
  * William Trent Holliday
@@ -37,6 +38,8 @@ public class BasketGUI {
     private HomeScreen homeScreen;
 
     public BasketGUI() {
+        // Make items in item table not draggable
+        itemTable.getTableHeader().setReorderingAllowed(false);
 
         addCustomerButton.addActionListener(new ActionListener() {
             @Override
@@ -122,13 +125,13 @@ public class BasketGUI {
         frame.setContentPane(gui.panel1);
         ResultSet inventoryResults = getResultsFromQuery("select * from item");
 
-        DefaultTableModel inventoryModel = new DefaultTableModel();
+        InventoryTable inventoryModel = new InventoryTable();
         inventoryModel.addColumn("Item name");
         inventoryModel.addColumn("Price");
-
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
         try {
             while (inventoryResults.next()) {
-                String[] rowData = {inventoryResults.getString("itemname"), "$" + inventoryResults.getDouble("price")};
+                String[] rowData = {inventoryResults.getString("itemname"), currencyFormat.format(inventoryResults.getDouble("price"))};
                 inventoryModel.addRow(rowData);
             }
         }catch(SQLException e){

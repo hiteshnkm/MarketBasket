@@ -23,7 +23,7 @@
             <properties>
               <font style="1"/>
               <requestFocusEnabled value="true"/>
-              <text value="Customer ID"/>
+              <text value="models.Customer ID"/>
             </properties>
           </component>
           <component id="29574" class="javax.swing.JLabel" binding="customerID">

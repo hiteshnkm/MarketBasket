@@ -1,3 +1,5 @@
+import models.Customer;
+
 import javax.swing.*;
 
 /**
