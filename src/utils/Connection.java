@@ -1,3 +1,7 @@
+package utils;
+
+import models.Item;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.sql.*;
@@ -15,9 +19,9 @@ public class Connection {
     private static String hostName = "oracle-sql-server.c5axgu5gzr3g.us-west-2.rds.amazonaws.com:1521";
 
     static class ConnectionHolder{
+
         private static java.sql.Connection CONN = createConnection();
     }
-
     private static java.sql.Connection createConnection() {
 
         java.sql.Connection conn = null;
@@ -59,6 +63,40 @@ public class Connection {
         messageFrame.setLocationRelativeTo(null);
         messageFrame.setVisible(true);
         return messageFrame;
+    }
+
+    public static ResultSet getResultsFromQuery(String sqlQuery, String... args){
+        java.sql.Connection connection = getConnection();
+        ResultSet results;
+        try {
+            PreparedStatement statement = connection.prepareStatement(sqlQuery, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            // Add all of the arguments to the sql query
+            for (int i = 0; i < args.length; i++) {
+                int index = i + 1;
+                statement.setString(index, args[i]);
+            }
+            results = statement.executeQuery();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+            results = null;
+        }
+        return results;
+    }
+
+    public static Item createItemFromQuery(ResultSet inventoryResults) {
+        try {
+            Long itemid = inventoryResults.getLong("itemid");
+            String itemname = inventoryResults.getString("itemname");
+            String description = inventoryResults.getString("description");
+            String category = inventoryResults.getString("category_type");
+            Double price = inventoryResults.getDouble("price");
+            int quantity = inventoryResults.getInt("quantity");
+
+            return new Item(itemid, itemname, description, category, price, quantity);
+        } catch(SQLException e){
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Error loading items from database.", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
     }
 
 }

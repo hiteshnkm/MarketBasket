@@ -1,14 +1,16 @@
 import models.Customer;
 import models.Item;
+import utils.Connection;
 
 import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.PreparedStatement;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 
 /**
@@ -38,7 +40,7 @@ public class BasketGUI {
 
     private void login(String text, char[] password) {
         String userQuery = "SELECT * FROM CUSTOMERS WHERE EMAIL = ? AND PASSWORD = ?";
-        ResultSet user = getResultsFromQuery(userQuery, text, String.valueOf(password));
+        ResultSet user = Connection.getResultsFromQuery(userQuery, text, String.valueOf(password));
         Customer loggedInCustomer = Customer.createCustomerFromQuery(user);
         if (loggedInCustomer == null) {
             JOptionPane.showMessageDialog(null, "Invalid login information.", "Could not login.", JOptionPane.ERROR_MESSAGE);
@@ -60,35 +62,17 @@ public class BasketGUI {
         tabPane.repaint();
     }
 
-    private static ResultSet getResultsFromQuery(String sqlQuery, String... args){
-        java.sql.Connection connection = Connection.getConnection();
-        ResultSet results;
-        try {
-            PreparedStatement statement = connection.prepareStatement(sqlQuery, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            // Add all of the arguments to the sql query
-            for (int i = 0; i < args.length; i++) {
-                int index = i + 1;
-                statement.setString(index, args[i]);
-            }
-            results = statement.executeQuery();
-        }catch(SQLException ex){
-            JOptionPane.showMessageDialog(null, ex.getMessage());
-            results = null;
-        }
-        return results;
-    }
-
     private void addCustomer(){
         String updateQuery = "insert into customers (firstname, lastname, password)" +
                                 " values ('" + firstNameField.getText() +
                                     "', '" + lastNameField.getText() +
                                     "', '" + passwordField.getText() +
                                 "')";
-        getResultsFromQuery(updateQuery);
+        Connection.getResultsFromQuery(updateQuery);
     }
 
     private void reloadCustomerList(){
-        ResultSet customerResults = getResultsFromQuery("select * from customers");
+        ResultSet customerResults = Connection.getResultsFromQuery("select * from customers");
         DefaultListModel customerModel = new DefaultListModel();
         try {
             while (customerResults.next())
@@ -103,27 +87,16 @@ public class BasketGUI {
         BasketGUI gui = new BasketGUI();
         JFrame frame = new JFrame("BasketGUI");
         frame.setContentPane(gui.panel1);
-        ResultSet inventoryResults = getResultsFromQuery("select * from item");
 
         InventoryTable inventoryModel = new InventoryTable();
-        inventoryModel.addColumn("Item name");
-        inventoryModel.addColumn("Price");
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
-        try {
-            while (inventoryResults.next()) {
-                Item dbItem = createItemFromQuery(inventoryResults);
-                if(dbItem != null) {
-                    String[] rowData = {dbItem.getItemName(), currencyFormat.format(dbItem.getPrice())};
-                    inventoryModel.addRow(rowData);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
         gui.itemTable.setModel(inventoryModel);
 
-        ResultSet customerResults = getResultsFromQuery("select * from customers");
+        JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
+        gui.itemTable.getColumn("DetailsButton").setCellRenderer(buttonRenderer);
+        gui.itemTable.getColumn("BuyButton").setCellRenderer(buttonRenderer);
+        gui.itemTable.addMouseListener(new JTableButtonMouseListener(gui.itemTable));
+
+        ResultSet customerResults = Connection.getResultsFromQuery("select * from customers");
         DefaultListModel customerModel = new DefaultListModel();
         try {
             while (customerResults.next())
@@ -136,22 +109,36 @@ public class BasketGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(625,310));
         frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
-    private static Item createItemFromQuery(ResultSet inventoryResults) {
-        try {
-            Long itemid = inventoryResults.getLong("itemid");
-            String itemname = inventoryResults.getString("itemname");
-            String description = inventoryResults.getString("description");
-            String category = inventoryResults.getString("category_type");
-            Double price = inventoryResults.getDouble("price");
-            int quantity = inventoryResults.getInt("quantity");
+    private static class JTableButtonRenderer implements TableCellRenderer {
+        @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            JButton button = (JButton)value;
+            return button;
+        }
+    }
 
-            return new Item(itemid, itemname, description, category, price, quantity);
-        } catch(SQLException e){
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Error loading items from database.", JOptionPane.ERROR_MESSAGE);
-            return null;
+    private static class JTableButtonMouseListener extends MouseAdapter {
+        private final JTable table;
+
+        public JTableButtonMouseListener(JTable table) {
+            this.table = table;
+        }
+
+        public void mouseClicked(MouseEvent e) {
+            int column = table.getColumnModel().getColumnIndexAtX(e.getX()); // get the column of the button
+            int row = e.getY() / table.getRowHeight(); //get the row of the button
+
+            //Checking the row or column is valid or not
+            if (row < table.getRowCount() && row >= 0 && column < table.getColumnCount() && column >= 0) {
+                Object value = table.getValueAt(row, column);
+                if (value instanceof JButton) {
+                    //perform a click event
+                    ((JButton) value).doClick();
+                }
+            }
         }
     }
 
@@ -180,5 +167,4 @@ public class BasketGUI {
     private HomeScreen homeScreen;
 
     // Other variables
-    private static ArrayList<Item> itemList = new ArrayList<Item>();
 }
