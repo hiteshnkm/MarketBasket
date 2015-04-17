@@ -15,19 +15,16 @@ public class BasketGUI {
     private JTabbedPane tabPane;
     private JPanel panel1;
     private JPanel inventoryTab;
-    private JPanel orderTab;
     private JTextField firstNameField;
     private JTextField lastNameField;
-    private JTextField emailField;
-    private JTextField addressField;
-    private JTextField stateField;
-    private JTextField countryField;
     private JPasswordField passwordField;
     private JButton addCustomerButton;
     private JList customerList;
     private JTextField customerField;
-    private JTextField cityField;
     private JTable itemTable;
+    private JPanel Orders;
+    private JTable table1;
+    private JScrollPane ordersTable;
 
     public BasketGUI() {
 
