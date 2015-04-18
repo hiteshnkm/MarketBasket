@@ -76,9 +76,11 @@ public class InventoryTable  extends AbstractTableModel {
                 final JButton buy_button = new JButton(COLUMN_NAMES[columnIndex]);
                 buy_button.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
-                        Connection.placeOrder(rowItem);
-                        JOptionPane.showMessageDialog(JOptionPane.getFrameForComponent(buy_button),
-                                "Buy " + rowItem.getItemName());
+//                        Connection.placeOrder(rowItem);
+                        BuyItem buyDialog = new BuyItem(rowItem);
+                        buyDialog.pack();
+                        buyDialog.setLocationRelativeTo(JOptionPane.getFrameForComponent(buy_button));
+                        buyDialog.setVisible(true);
                     }
                 });
                 return buy_button;
