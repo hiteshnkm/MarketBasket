@@ -76,7 +76,7 @@ public class BasketGUI {
         gui.itemTable.addMouseListener(new JTableButtonMouseListener(gui.itemTable));
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(625, 310));
+        frame.setPreferredSize(new Dimension(625, 450));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);

@@ -69,7 +69,6 @@ public class InventoryTable  extends AbstractTableModel {
                         dialog.pack();
                         dialog.setLocationRelativeTo(JOptionPane.getFrameForComponent(detail_button));
                         dialog.setVisible(true);
-                        System.out.println("I made it here.");
                     }
                 });
                 return detail_button;
