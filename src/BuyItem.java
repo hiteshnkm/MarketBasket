@@ -23,7 +23,7 @@ public class BuyItem extends JDialog {
 
         buyLabel.setText(itemBuying.getItemName());
         descriptionLabel.setText("<html><body style='width:150px;'>"+itemBuying.getDescription());
-        pricePerUnit.setText(String.valueOf(itemBuying.getPrice()));
+        pricePerUnit.setText(currencyFormat.format(itemBuying.getPrice()));
         category.setText(itemBuying.getCategoryType());
         itemQuantity.setText(String.valueOf(itemBuying.getQuantity()));
         totalOrderCost.setText(currencyFormat.format(0));

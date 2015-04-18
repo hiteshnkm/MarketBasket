@@ -1,7 +1,10 @@
+import com.jtattoo.plaf.acryl.AcrylLookAndFeel;
+
 import models.Customer;
 import utils.Connection;
 
 import javax.swing.*;
+import javax.swing.plaf.synth.SynthLookAndFeel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -55,6 +58,21 @@ public class BasketGUI {
     }
 
     public static void main(String[] args) {
+
+        try
+        {
+            UIManager.setLookAndFeel(new AcrylLookAndFeel());
+        }
+        catch (Exception e) {
+            System.out.println("Failed to load look and feel. You do not have JTattoo installed. " +
+                    "Using system them instead.");
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
         BasketGUI gui = new BasketGUI();
         JFrame frame = new JFrame("BasketGUI");
         frame.setContentPane(gui.panel1);
@@ -63,7 +81,7 @@ public class BasketGUI {
         gui.itemTable.setModel(inventoryModel);
 
         gui.itemTable.setIntercellSpacing(new Dimension(5,5));
-        gui.itemTable.setRowHeight(20);
+        gui.itemTable.setRowHeight(35);
 
         JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
         gui.itemTable.getColumn("Details").setCellRenderer(buttonRenderer);
