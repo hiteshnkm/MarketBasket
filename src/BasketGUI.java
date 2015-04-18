@@ -1,10 +1,7 @@
-import com.jtattoo.plaf.acryl.AcrylLookAndFeel;
-
 import models.Customer;
 import utils.Connection;
 
 import javax.swing.*;
-import javax.swing.plaf.synth.SynthLookAndFeel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -58,10 +55,9 @@ public class BasketGUI {
     }
 
     public static void main(String[] args) {
-
         try
         {
-            UIManager.setLookAndFeel(new AcrylLookAndFeel());
+            UIManager.setLookAndFeel("com.jtattoo.plaf.acryl.AcrylLookAndFeel");
         }
         catch (Exception e) {
             System.out.println("Failed to load look and feel. You do not have JTattoo installed. " +
