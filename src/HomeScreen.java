@@ -28,7 +28,7 @@ public class HomeScreen {
         lastName.setText(customer.getLastName());
         email.setText(customer.getEmail());
         phoneNumber.setText(String.valueOf(customer.getPhoneNumber()));
-        age.setText(String.valueOf(customer.getCompany()));
+        age.setText(String.valueOf(customer.getAge()));
         company.setText(customer.getCompany());
         getNotifications.setText(customer.getReceiveNotification());
     }
