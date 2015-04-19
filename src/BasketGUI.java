@@ -49,7 +49,17 @@ public class BasketGUI {
                 }
             });
             tabPane.setComponentAt(0, homeScreen.getMainPanel());
-            viewOrders();
+
+            OrderTable orderModel = new OrderTable(Connection.getLoggedInCustomer());
+            orderTable.setModel(orderModel);
+
+            orderTable.setIntercellSpacing(new Dimension(5, 5));
+            orderTable.setRowHeight(35);
+
+            JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
+            orderTable.getColumn("View Details").setCellRenderer(buttonRenderer);
+            orderTable.getColumn("Make Payment").setCellRenderer(buttonRenderer);
+            orderTable.addMouseListener(new JTableButtonMouseListener(orderTable));
         }
     }
 
@@ -80,15 +90,13 @@ public class BasketGUI {
         InventoryTable inventoryModel = new InventoryTable();
         gui.itemTable.setModel(inventoryModel);
 
-        gui.itemTable.setIntercellSpacing(new Dimension(5,5));
+        gui.itemTable.setIntercellSpacing(new Dimension(5, 5));
         gui.itemTable.setRowHeight(35);
 
         JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
         gui.itemTable.getColumn("Details").setCellRenderer(buttonRenderer);
         gui.itemTable.getColumn("Buy Now").setCellRenderer(buttonRenderer);
         gui.itemTable.addMouseListener(new JTableButtonMouseListener(gui.itemTable));
-
-
 
 
 
@@ -102,34 +110,7 @@ public class BasketGUI {
 
     }
 
-    //Damien input...(check code)------------------------------------------------------------------------
 
-    private static void viewOrders() {
-        String userQuery = "SELECT * FROM ORDERS WHERE CUSTOMERID = ?";
-        Customer loggedInCustomer = Connection.getLoggedInCustomer();
-        long customerID = loggedInCustomer.getCustomerID();
-        ResultSet orderResults = Connection.getResultsFromQuery(userQuery, String.valueOf(customerID));
-
-        try {
-            while(orderResults.next()) {
-                    long orderid = orderResults.getLong("ORDERID");
-                    int customerid = orderResults.getInt("CUSTOMERID");
-                    java.sql.Date orderDate = orderResults.getDate("ORDERDATE");
-                    double subTotal = orderResults.getDouble("SUBTOTAL");
-                    double taxes = orderResults.getDouble("TAXES");
-                    double totalPrice = orderResults.getDouble("TOTALPRICE");
-                    String shippingName = orderResults.getString("SHIPPINGNAME");
-                    int shippingAddressID = orderResults.getInt("SHIPADDRESS");
-                    Address shippingAddress = Address.getAddressByID(shippingAddressID);
-                    int billingAddressID = orderResults.getInt("BILLINGADDRESS");
-                    Address billingAddress = Address.getAddressByID((billingAddressID));
-            }
-
-        } catch (SQLException e) {JOptionPane.showMessageDialog(null, e.getMessage(), "Can not view orders.", JOptionPane.ERROR_MESSAGE);
-
-        }
-
-    }
     private static class JTableButtonRenderer extends DefaultTableCellRenderer {
         @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
