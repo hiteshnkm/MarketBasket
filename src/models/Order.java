@@ -12,21 +12,23 @@ public class Order {
     private Date orderDate;
     private double subTotal;
     private double taxes;
+    private double totalPrice;
     private char shippingName;
     private Address shippingAddress;
     private Address BillingAddress;
 
-
-    public Order(long orderid, int customerid, Date orderDate, double subTotal, double taxes, char shippingName, Address shippingAddress, Address billingAddress) {
+    public Order(long orderid, int customerid, Date orderDate, double subTotal, double taxes, double totalPrice, char shippingName, Address shippingAddress, Address billingAddress) {
         this.orderid = orderid;
         this.customerid = customerid;
         this.orderDate = orderDate;
         this.subTotal = subTotal;
         this.taxes = taxes;
+        this.totalPrice = totalPrice;
         this.shippingName = shippingName;
         this.shippingAddress = shippingAddress;
         BillingAddress = billingAddress;
     }
+
 
     public long getOrderid() {
         return orderid;
@@ -46,6 +48,10 @@ public class Order {
 
     public double getTaxes() {
         return taxes;
+    }
+
+    public double getTotalPrice() {
+        return totalPrice;
     }
 
     public char getShippingName() {

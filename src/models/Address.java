@@ -51,7 +51,7 @@ public class Address {
     }
 
     public static Address getAddressByID(int addressID) {
-        String addressQuery = "Select * from address where adressid = ?";
+        String addressQuery = "Select * from address where addressid = ?";
         ResultSet addressResults = Connection.getResultsFromQuery(addressQuery, String.valueOf(addressID));
         try {
             while (addressResults.next()) {

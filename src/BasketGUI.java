@@ -1,3 +1,4 @@
+import models.Address;
 import models.Customer;
 import utils.Connection;
 
@@ -9,6 +10,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Date;
 
 /**
  * William Trent Holliday
@@ -46,6 +49,7 @@ public class BasketGUI {
                 }
             });
             tabPane.setComponentAt(0, homeScreen.getMainPanel());
+            viewOrders();
         }
     }
 
@@ -84,18 +88,53 @@ public class BasketGUI {
         gui.itemTable.getColumn("Buy Now").setCellRenderer(buttonRenderer);
         gui.itemTable.addMouseListener(new JTableButtonMouseListener(gui.itemTable));
 
+
+
+
+
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(625, 450));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+
     }
 
+    //Damien input...(check code)------------------------------------------------------------------------
+
+    private static void viewOrders() {
+        String userQuery = "SELECT * FROM ORDERS WHERE CUSTOMERID = ?";
+        Customer loggedInCustomer = Connection.getLoggedInCustomer();
+        long customerID = loggedInCustomer.getCustomerID();
+        ResultSet orderResults = Connection.getResultsFromQuery(userQuery, String.valueOf(customerID));
+
+        try {
+            while(orderResults.next()) {
+                    long orderid = orderResults.getLong("ORDERID");
+                    int customerid = orderResults.getInt("CUSTOMERID");
+                    java.sql.Date orderDate = orderResults.getDate("ORDERDATE");
+                    double subTotal = orderResults.getDouble("SUBTOTAL");
+                    double taxes = orderResults.getDouble("TAXES");
+                    double totalPrice = orderResults.getDouble("TOTALPRICE");
+                    String shippingName = orderResults.getString("SHIPPINGNAME");
+                    int shippingAddressID = orderResults.getInt("SHIPADDRESS");
+                    Address shippingAddress = Address.getAddressByID(shippingAddressID);
+                    int billingAddressID = orderResults.getInt("BILLINGADDRESS");
+                    Address billingAddress = Address.getAddressByID((billingAddressID));
+            }
+
+        } catch (SQLException e) {JOptionPane.showMessageDialog(null, e.getMessage(), "Can not view orders.", JOptionPane.ERROR_MESSAGE);
+
+        }
+
+    }
     private static class JTableButtonRenderer extends DefaultTableCellRenderer {
         @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
                     row, column);
-            JButton button = (JButton)value;
+            JButton button = (JButton) value;
             return button;
         }
     }
