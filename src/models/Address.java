@@ -1,18 +1,23 @@
 package models;
 
+import utils.Connection;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  * Created by Dr.H on 4/17/2015.
  */
 public class Address {
 
     private long addressid;
-    private char addressLine;
-    private char city;
+    private String addressLine;
+    private String city;
     private int zip;
-    private char country;
-    private char state;
+    private String country;
+    private String state;
 
-    public Address(long addressid, char addressLine, char city, int zip, char country, char state) {
+    public Address(long addressid, String addressLine, String city, int zip, String country, String state) {
         this.addressid = addressid;
         this.addressLine = addressLine;
         this.city = city;
@@ -25,11 +30,11 @@ public class Address {
         return addressid;
     }
 
-    public char getAddressLine() {
+    public String getAddressLine() {
         return addressLine;
     }
 
-    public char getCity() {
+    public String getCity() {
         return city;
     }
 
@@ -37,11 +42,32 @@ public class Address {
         return zip;
     }
 
-    public char getCountry() {
+    public String getCountry() {
         return country;
     }
 
-    public char getState() {
+    public String getState() {
         return state;
+    }
+
+    public static Address getAddressByID(int addressID) {
+        String addressQuery = "Select * from address where adressid = ?";
+        ResultSet addressResults = Connection.getResultsFromQuery(addressQuery, String.valueOf(addressID));
+        try {
+            while (addressResults.next()) {
+                long addressid = addressResults.getLong("ADDRESSID");
+                String addressLine = addressResults.getString("ADDRESSLINE");
+                String city = addressResults.getString("CITY");
+                int zip = addressResults.getInt("ZIP");
+                String country = addressResults.getString("COUNTRY");
+                String state = addressResults.getString("STATE");
+
+                return new Address(addressid, addressLine, city, zip, country, state);
+            }
+        } catch (SQLException ex) {
+
+        }
+
+        return null;
     }
 }

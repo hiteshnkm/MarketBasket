@@ -18,9 +18,10 @@ public class Customer {
     private int age;
     private String company;
     private String receiveNotification;
+    private Address address;
 
     public Customer(int id, String fName, String middleInitial, String lName, String email,
-                    long phoneNum, int age, String company, String receiveNotification) {
+                    long phoneNum, int age, String company, String receiveNotification, Address address) {
         this.customerID = id;
         this.firstName = fName;
         this.middleInit = middleInitial;
@@ -30,6 +31,7 @@ public class Customer {
         this.age = age;
         this.company = company;
         this.receiveNotification = receiveNotification;
+        this.address = address;
     }
 
     public static Customer createCustomerFromQuery(ResultSet user) {
@@ -45,29 +47,22 @@ public class Customer {
                 return null;
             }
 
-            int customerID;
-            String firstName;
-            String middleInit;
-            String lastName;
-            String email;
-            long phoneNum;
-            int age;
-            String company;
-            String notif;
             while(user.next()) {
-                customerID = user.getInt("CUSTOMERID");
-                firstName = user.getString("FIRSTNAME");
-                middleInit = user.getString("MIDDLEINIT");
-                lastName = user.getString("LASTNAME");
-                email = user.getString("EMAIL");
-                phoneNum = user.getLong("PHONENUMBER");
-                age = user.getInt("AGE");
-                company = user.getString("COMPANY");
-                notif = user.getString("RECEIVENOTIF");
+                int customerID = user.getInt("CUSTOMERID");
+                String firstName = user.getString("FIRSTNAME");
+                String middleInit = user.getString("MIDDLEINIT");
+                String lastName = user.getString("LASTNAME");
+                String email = user.getString("EMAIL");
+                long phoneNum = user.getLong("PHONENUMBER");
+                int age = user.getInt("AGE");
+                String company = user.getString("COMPANY");
+                String notif = user.getString("RECEIVENOTIF");
+                int addressID = user.getInt("ADDRESS");
+                Address address = Address.getAddressByID(addressID);
 
                 return new Customer(
                         customerID, firstName, middleInit, lastName, email,
-                        phoneNum, age, company, notif
+                        phoneNum, age, company, notif, address
                 );
             }
 
@@ -149,4 +144,7 @@ public class Customer {
         this.receiveNotification = receiveNotification;
     }
 
+    public Address getAddress() {
+        return address;
+    }
 }
