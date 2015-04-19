@@ -1,7 +1,9 @@
 package utils;
 
+import models.Address;
 import models.Customer;
 import models.Item;
+import models.Order;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -97,6 +99,29 @@ public class Connection {
             return new Item(itemid, itemname, description, category, price, quantity);
         } catch(SQLException e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Error loading items from database.", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+    }
+
+    public static Order createOrderFromQuery(ResultSet orderResults) {
+        try {
+            long orderid = orderResults.getLong("ORDERID");
+            int customerid = orderResults.getInt("CUSTOMERID");
+            java.sql.Date orderDate = orderResults.getDate("ORDERDATE");
+            double subTotal = orderResults.getDouble("SUBTOTAL");
+            double taxes = orderResults.getDouble("TAXES");
+            double totalPrice = orderResults.getDouble("TOTALPRICE");
+            String shippingName = orderResults.getString("SHIPPINGNAME");
+            int shippingAddressID = orderResults.getInt("SHIPADDRESS");
+            Address shippingAddress = Address.getAddressByID(shippingAddressID);
+            int billingAddressID = orderResults.getInt("BILLINGADDRESS");
+            Address billingAddress = Address.getAddressByID((billingAddressID));
+
+            return new Order(orderid, customerid, orderDate, subTotal,
+                    taxes, totalPrice, shippingName, shippingAddress, billingAddress);
+
+        } catch (SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error loading orders from database.", JOptionPane.ERROR_MESSAGE);
             return null;
         }
     }

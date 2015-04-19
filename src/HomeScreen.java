@@ -19,6 +19,11 @@ public class HomeScreen {
     private JLabel getNotifications;
     private JPanel welcomePanel;
     private JButton logoutButton;
+    private JLabel addressLine;
+    private JLabel cityLabel;
+    private JLabel stateLabel;
+    private JLabel zipLabel;
+    private JLabel countryLabel;
 
     public HomeScreen(Customer customer){
         usernameLabel.setText(customer.getFirstName());

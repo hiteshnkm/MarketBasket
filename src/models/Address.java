@@ -2,6 +2,7 @@ package models;
 
 import utils.Connection;
 
+import javax.swing.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -65,7 +66,7 @@ public class Address {
                 return new Address(addressid, addressLine, city, zip, country, state);
             }
         } catch (SQLException ex) {
-
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error loading Address from database.", JOptionPane.ERROR_MESSAGE);
         }
 
         return null;
