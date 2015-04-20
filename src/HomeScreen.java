@@ -1,3 +1,4 @@
+import models.Address;
 import models.Customer;
 
 import javax.swing.*;
@@ -36,6 +37,13 @@ public class HomeScreen {
         age.setText(String.valueOf(customer.getAge()));
         company.setText(customer.getCompany());
         getNotifications.setText(customer.getReceiveNotification());
+
+        Address address = customer.getAddress();
+        addressLine.setText(address.getAddressLine());
+        cityLabel.setText(address.getCity());
+        stateLabel.setText(address.getState());
+        zipLabel.setText(String.valueOf(address.getZip()));
+        countryLabel.setText(address.getCountry());
     }
 
     public JPanel getMainPanel(){

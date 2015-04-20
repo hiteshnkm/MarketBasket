@@ -39,7 +39,7 @@ public class BasketGUI {
 
         if (loggedInCustomer == null) {
             JOptionPane.showMessageDialog(null, "Invalid login information.", "Could not login.", JOptionPane.ERROR_MESSAGE);
-        }else {
+        } else {
             homeScreen = new HomeScreen(loggedInCustomer);
             logoutButton = homeScreen.getLogoutButton();
             logoutButton.addActionListener(new ActionListener() {
@@ -60,6 +60,7 @@ public class BasketGUI {
             orderTable.getColumn("View Details").setCellRenderer(buttonRenderer);
             orderTable.getColumn("Make Payment").setCellRenderer(buttonRenderer);
             orderTable.addMouseListener(new JTableButtonMouseListener(orderTable));
+            tabPane.repaint();
         }
     }
 
@@ -98,11 +99,8 @@ public class BasketGUI {
         gui.itemTable.getColumn("Buy Now").setCellRenderer(buttonRenderer);
         gui.itemTable.addMouseListener(new JTableButtonMouseListener(gui.itemTable));
 
-
-
-
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(625, 450));
+        frame.setPreferredSize(new Dimension(625, 540));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
