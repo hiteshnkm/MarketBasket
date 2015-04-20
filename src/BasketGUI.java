@@ -3,12 +3,11 @@ import models.Customer;
 import utils.Connection;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
@@ -27,6 +26,17 @@ public class BasketGUI {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 login(usernameField.getText(), loginPasswordField.getPassword());
+            }
+        });
+        tabPane.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent changeEvent) {
+                // Refresh our cart when that tab is selected
+                if(tabPane.getSelectedIndex() == 2) {
+                    CartTable cartTable = new CartTable();
+                    cartItemTable.setModel(cartTable);
+                    tabPane.repaint();
+                }
             }
         });
     }
@@ -60,11 +70,18 @@ public class BasketGUI {
             orderTable.getColumn("View Details").setCellRenderer(buttonRenderer);
             orderTable.getColumn("Make Payment").setCellRenderer(buttonRenderer);
             orderTable.addMouseListener(new JTableButtonMouseListener(orderTable));
+
+            CartTable cartTable = new CartTable();
+            cartItemTable.setModel(cartTable);
+            cartItemTable.setIntercellSpacing(new Dimension(5, 5));
+            cartItemTable.getColumn("Remove").setCellRenderer(buttonRenderer);
+
             tabPane.repaint();
         }
     }
 
     private void logout() {
+        Connection.setLoggedInCustomer(null);
         tabPane.setComponentAt(0, homePanel);
         tabPane.repaint();
     }
@@ -95,8 +112,9 @@ public class BasketGUI {
         gui.itemTable.setRowHeight(35);
 
         JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
-        gui.itemTable.getColumn("Details").setCellRenderer(buttonRenderer);
-        gui.itemTable.getColumn("Buy Now").setCellRenderer(buttonRenderer);
+
+        gui.itemTable.getColumnModel().getColumn(2).setCellRenderer(buttonRenderer);
+        gui.itemTable.getColumnModel().getColumn(3).setCellRenderer(buttonRenderer);
         gui.itemTable.addMouseListener(new JTableButtonMouseListener(gui.itemTable));
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -155,6 +173,8 @@ public class BasketGUI {
     private JButton logoutButton;
     private JPanel homePanel;
     private JTable orderTable;
+    private JTable cartItemTable;
+    private JScrollPane cartTab;
     private HomeScreen homeScreen;
 
     // Other variables

@@ -1,4 +1,6 @@
+import models.Customer;
 import models.Item;
+import utils.Connection;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -6,7 +8,7 @@ import java.text.NumberFormat;
 
 public class BuyItem extends JDialog {
     private JPanel contentPane;
-    private JButton buyButton;
+    private JButton addToCartButton;
     private JButton buttonCancel;
     private JLabel buyLabel;
     private JLabel descriptionLabel;
@@ -25,10 +27,11 @@ public class BuyItem extends JDialog {
         descriptionLabel.setText("<html><body style='width:150px;'>"+itemBuying.getDescription());
         pricePerUnit.setText(currencyFormat.format(itemBuying.getPrice()));
         category.setText(itemBuying.getCategoryType());
+
         itemQuantity.setText(String.valueOf(itemBuying.getQuantity()));
         totalOrderCost.setText(currencyFormat.format(0));
 
-        Object[] quantitiesAvailable = new Integer[itemBuying.getQuantity() + 1];
+        final Object[] quantitiesAvailable = new Integer[itemBuying.getQuantity() + 1];
         for (int i=0; i<=itemBuying.getQuantity(); i++){
             quantitiesAvailable[i] = i;
         }
@@ -38,11 +41,18 @@ public class BuyItem extends JDialog {
 
         setContentPane(contentPane);
         setModal(true);
-        getRootPane().setDefaultButton(buyButton);
+        getRootPane().setDefaultButton(addToCartButton);
 
-        buyButton.addActionListener(new ActionListener() {
+        addToCartButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                onOK();
+                Integer quantity = (Integer) purchaseQuantityBox.getSelectedItem();
+                if (quantity > 0) {
+                    Customer currentCustomer = Connection.getLoggedInCustomer();
+                    currentCustomer.addItemToCart(itemBuying, quantity);
+                    onOK();
+                } else {
+                    JOptionPane.showMessageDialog(JOptionPane.getFrameForComponent(purchaseQuantityBox), "Must select the quantity.", "Error adding to cart", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 

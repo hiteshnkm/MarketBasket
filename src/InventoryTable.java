@@ -17,8 +17,8 @@ import java.util.ArrayList;
  */
 public class InventoryTable  extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
-    private static final String[] COLUMN_NAMES = new String[] {"Item Name", "Price", "Details", "Buy Now"};
-    private static final Class<?>[] COLUMN_TYPES = new Class<?>[] {String.class, Long.class, JButton.class,  JButton.class};
+    private static final String[] COLUMN_NAMES = new String[] {"Item Name", "Price", "", ""};
+    private static final Class<?>[] COLUMN_TYPES = new Class<?>[] {String.class, Long.class, JButton.class, JButton.class};
     private static ArrayList<Item> itemList = new ArrayList<Item>();
     private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
 
@@ -62,7 +62,7 @@ public class InventoryTable  extends AbstractTableModel {
             case 1:
                 return currencyFormat.format(rowItem.getPrice());
             case 2:
-                final JButton detail_button = new JButton(COLUMN_NAMES[columnIndex]);
+                final JButton detail_button = new JButton("Details");
                 detail_button.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
                         ItemDetail dialog = new ItemDetail(rowItem);
@@ -73,7 +73,7 @@ public class InventoryTable  extends AbstractTableModel {
                 });
                 return detail_button;
             case 3:
-                final JButton buy_button = new JButton(COLUMN_NAMES[columnIndex]);
+                final JButton buy_button = new JButton("Buy");
                 buy_button.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
 //                        Connection.placeOrder(rowItem);

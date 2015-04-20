@@ -2,6 +2,10 @@ package models;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * William Trent Holliday
@@ -19,6 +23,7 @@ public class Customer {
     private String company;
     private String receiveNotification;
     private Address address;
+    private List<Map> cartItems = new ArrayList<Map>();
 
     public Customer(int id, String fName, String middleInitial, String lName, String email,
                     long phoneNum, int age, String company, String receiveNotification, Address address) {
@@ -70,6 +75,21 @@ public class Customer {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void addItemToCart(Item item, int quantity) {
+        Map itemMap = new HashMap();
+        itemMap.put("item", item);
+        itemMap.put("quantity", quantity);
+        cartItems.add(itemMap);
+    }
+
+    public void removeItemFromCart(int itemIndex) {
+        cartItems.remove(itemIndex);
+    }
+
+    public List<Map> getCartItems() {
+        return cartItems;
     }
 
     public int getCustomerID() {
