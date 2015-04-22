@@ -1,6 +1,11 @@
 package models;
 
+import utils.Connection;
+
+import javax.swing.*;
 import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Created by Dr.H on 4/17/2015.
@@ -27,6 +32,38 @@ public class Order {
         this.shippingName = shippingName;
         this.shippingAddress = shippingAddress;
         BillingAddress = billingAddress;
+    }
+
+    public boolean createNewOrder(Customer customer, double subTotal, double taxes, double totalPrice, Address shippingAddress, Address billingAddress){
+        String sqlQuery = "insert into orders (" +
+                "CUSTOMERID, ORDERDATE, " +
+                "SUBTOTAL, TAXES, " +
+                "TOTALPRICE, SHIPPINGNAME, " +
+                "SHIPADDRESS, BILLINGADDRESS" +
+                ")" +
+                "VALUES (" +
+                "?, ?, ?, ?, ?, ?, ?, ?);";
+        java.sql.Date sqlDate = new java.sql.Date(new java.util.Date().getTime());
+        ResultSet createOrderResult = Connection.getResultsFromQuery(
+                sqlQuery,
+                // Parameters to the sql query
+                String.valueOf(customer.getCustomerID()),
+                String.valueOf(sqlDate),
+                String.valueOf(subTotal),
+                String.valueOf(taxes),
+                String.valueOf(totalPrice),
+                customer.getFirstName() + " " + customer.getLastName(),
+                String.valueOf(shippingAddress.getAddressid()),
+                String.valueOf(billingAddress.getAddressid())
+        );
+        try {
+            while(createOrderResult.next()){
+                JOptionPane.showMessageDialog(null, createOrderResult.getString(0));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
     public long getOrderid() {

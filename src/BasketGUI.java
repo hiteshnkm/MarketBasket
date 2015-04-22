@@ -6,11 +6,14 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableCellRenderer;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * William Trent Holliday
@@ -40,10 +43,14 @@ public class BasketGUI {
                 }
             }
         });
-        placeOrderButton.addActionListener(new ActionListener() {
+        placeOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                ((CartTable) cartItemTable.getModel()).getCartItems();
+                List<Map> cartItems = ((CartTable) cartItemTable.getModel()).getCartItems();
+                CreateOrder order = new CreateOrder(cartItems);
+                order.pack();
+                order.setLocationRelativeTo(JOptionPane.getFrameForComponent(placeOrder));
+                order.setVisible(true);
             }
         });
     }
@@ -180,7 +187,7 @@ public class BasketGUI {
     private JTable orderTable;
     private JTable cartItemTable;
     private JScrollPane cartTab;
-    private JButton placeOrderButton;
+    private JButton placeOrder;
     private HomeScreen homeScreen;
 
     // Other variables
