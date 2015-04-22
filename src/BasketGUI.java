@@ -35,6 +35,7 @@ public class BasketGUI {
                 if(tabPane.getSelectedIndex() == 2) {
                     CartTable cartTable = new CartTable();
                     cartItemTable.setModel(cartTable);
+                    cartItemTable.getColumn("Remove").setCellRenderer(new JTableButtonRenderer());
                     tabPane.repaint();
                 }
             }
@@ -69,12 +70,10 @@ public class BasketGUI {
             JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
             orderTable.getColumn("View Details").setCellRenderer(buttonRenderer);
             orderTable.getColumn("Make Payment").setCellRenderer(buttonRenderer);
-            orderTable.addMouseListener(new JTableButtonMouseListener(orderTable));
 
-            CartTable cartTable = new CartTable();
-            cartItemTable.setModel(cartTable);
+            cartItemTable.addMouseListener(new JTableButtonMouseListener(cartItemTable));
+            cartItemTable.setRowHeight(35);
             cartItemTable.setIntercellSpacing(new Dimension(5, 5));
-            cartItemTable.getColumn("Remove").setCellRenderer(buttonRenderer);
 
             tabPane.repaint();
         }
@@ -155,6 +154,7 @@ public class BasketGUI {
                     ((JButton) value).doClick();
                 }
             }
+            table.getRootPane().repaint();
         }
     }
 

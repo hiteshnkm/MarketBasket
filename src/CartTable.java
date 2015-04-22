@@ -17,17 +17,17 @@ import java.util.Map;
  * William Trent Holliday
  * 4/16/15
  */
-public class CartTable  extends AbstractTableModel {
+public class CartTable extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
     private static final String[] COLUMN_NAMES = new String[] {"Item Name", "Price", "Quantity", "Remove"};
     private static final Class<?>[] COLUMN_TYPES = new Class<?>[] {String.class, Long.class, int.class,  JButton.class};
     private static List<Map> itemList = new ArrayList<Map>();
     private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+    private Customer loggedInCustomer;
 
     public CartTable (){
-        Customer currentCustomer = Connection.getLoggedInCustomer();
-        itemList = currentCustomer.getCartItems();
-
+        loggedInCustomer = Connection.getLoggedInCustomer();
+        itemList = loggedInCustomer.getCartItems();
     }
 
     @Override public int getColumnCount() {
@@ -63,7 +63,7 @@ public class CartTable  extends AbstractTableModel {
                 removeItem.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        JOptionPane.showMessageDialog(null, "Clicked item " + rowItem.getItemName() + " with quantity: " + itemQuantity);
+                        loggedInCustomer.removeItemFromCart(rowIndex);
                     }
                 });
                 return removeItem;
