@@ -71,4 +71,8 @@ public class CartTable extends AbstractTableModel {
                 return "Error";
         }
     }
+
+    public List<Map> getCartItems(){
+        return itemList;
+    }
 }

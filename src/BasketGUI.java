@@ -40,6 +40,12 @@ public class BasketGUI {
                 }
             }
         });
+        placeOrderButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                ((CartTable) cartItemTable.getModel()).getCartItems();
+            }
+        });
     }
 
     private void login(String text, char[] password) {
@@ -122,7 +128,6 @@ public class BasketGUI {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-
     }
 
 
@@ -175,6 +180,7 @@ public class BasketGUI {
     private JTable orderTable;
     private JTable cartItemTable;
     private JScrollPane cartTab;
+    private JButton placeOrderButton;
     private HomeScreen homeScreen;
 
     // Other variables
