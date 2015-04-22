@@ -20,11 +20,6 @@ public class HomeScreen {
     private JLabel getNotifications;
     private JPanel welcomePanel;
     private JButton logoutButton;
-    private JLabel addressLine;
-    private JLabel cityLabel;
-    private JLabel stateLabel;
-    private JLabel zipLabel;
-    private JLabel countryLabel;
 
     public HomeScreen(Customer customer){
         usernameLabel.setText(customer.getFirstName());
@@ -37,13 +32,6 @@ public class HomeScreen {
         age.setText(String.valueOf(customer.getAge()));
         company.setText(customer.getCompany());
         getNotifications.setText(customer.getReceiveNotification());
-
-        Address address = customer.getAddress();
-        addressLine.setText(address.getAddressLine());
-        cityLabel.setText(address.getCity());
-        stateLabel.setText(address.getState());
-        zipLabel.setText(String.valueOf(address.getZip()));
-        countryLabel.setText(address.getCountry());
     }
 
     public JPanel getMainPanel(){

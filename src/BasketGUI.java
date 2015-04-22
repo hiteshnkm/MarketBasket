@@ -42,9 +42,9 @@ public class BasketGUI {
     }
 
     private void login(String text, char[] password) {
-        String userQuery = "SELECT * FROM CUSTOMERS WHERE EMAIL = ? AND PASSWORD = ?";
-        ResultSet user = Connection.getResultsFromQuery(userQuery, text, String.valueOf(password));
-        Customer loggedInCustomer = Customer.createCustomerFromQuery(user);
+        String userQuery = "SELECT * FROM CUSTOMERS WHERE EMAIL = ?";
+        ResultSet user = Connection.getResultsFromQuery(userQuery, text);
+        Customer loggedInCustomer = Customer.createCustomerFromQuery(user, String.valueOf(password));
         Connection.setLoggedInCustomer(loggedInCustomer);
 
         if (loggedInCustomer == null) {
@@ -89,7 +89,7 @@ public class BasketGUI {
     public static void main(String[] args) {
         try
         {
-            UIManager.setLookAndFeel("com.jtattoo.plaf.acryl.AcrylLookAndFeel");
+            UIManager.setLookAndFeel("com.jtattoo.plaf.hifi.HiFiLookAndFeel");
         }
         catch (Exception e) {
             System.out.println("Failed to load look and feel. You do not have JTattoo installed. " +

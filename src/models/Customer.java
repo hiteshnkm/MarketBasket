@@ -1,5 +1,7 @@
 package models;
 
+import utils.Connection;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,11 +24,12 @@ public class Customer {
     private int age;
     private String company;
     private String receiveNotification;
-    private Address address;
     private List<Map> cartItems = new ArrayList<Map>();
+    private List<Address> shippingAddresses = new ArrayList<Address>();
+    private List<Address> billingAddresses = new ArrayList<Address>();
 
     public Customer(int id, String fName, String middleInitial, String lName, String email,
-                    long phoneNum, int age, String company, String receiveNotification, Address address) {
+                    long phoneNum, int age, String company, String receiveNotification, List<Address> shipList, List<Address> billList) {
         this.customerID = id;
         this.firstName = fName;
         this.middleInit = middleInitial;
@@ -36,10 +39,11 @@ public class Customer {
         this.age = age;
         this.company = company;
         this.receiveNotification = receiveNotification;
-        this.address = address;
+        this.shippingAddresses = shipList;
+        this.billingAddresses = billList;
     }
 
-    public static Customer createCustomerFromQuery(ResultSet user) {
+    public static Customer createCustomerFromQuery(ResultSet user, String password) {
         try {
 
             int rowcount = 0;
@@ -54,6 +58,13 @@ public class Customer {
 
             while(user.next()) {
                 int customerID = user.getInt("CUSTOMERID");
+                Account account = getAccountInfo(customerID, password);
+                // If account is null then that means we were unable to find an account for the
+                // specified customer id and password, which means that we were given bad login
+                // credentials.
+                if (account == null){
+                    return null;
+                }
                 String firstName = user.getString("FIRSTNAME");
                 String middleInit = user.getString("MIDDLEINIT");
                 String lastName = user.getString("LASTNAME");
@@ -61,17 +72,32 @@ public class Customer {
                 long phoneNum = user.getLong("PHONENUMBER");
                 int age = user.getInt("AGE");
                 String company = user.getString("COMPANY");
-                String notif = user.getString("RECEIVENOTIF");
-                int addressID = user.getInt("ADDRESS");
-                Address address = Address.getAddressByID(addressID);
+                String notif = account.getReceiveNotif();
+                List<Address> billingList = Address.getAddressesForCustomer(customerID, true);
+                List<Address> shippingList = Address.getAddressesForCustomer(customerID, false);
 
                 return new Customer(
                         customerID, firstName, middleInit, lastName, email,
-                        phoneNum, age, company, notif, address
+                        phoneNum, age, company, notif, shippingList, billingList
                 );
             }
 
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static Account getAccountInfo(int customerID, String password) {
+        String accountQuery = "select * from account where customerid = ? and password = ?";
+        ResultSet resultSet = Connection.getResultsFromQuery(accountQuery, String.valueOf(customerID), password);
+
+        try {
+            while(resultSet.next()) {
+                String receiveNotif = resultSet.getString("receivenotif");
+                return new Account(receiveNotif);
+            }
+        } catch(SQLException e){
             e.printStackTrace();
         }
         return null;
@@ -164,7 +190,11 @@ public class Customer {
         this.receiveNotification = receiveNotification;
     }
 
-    public Address getAddress() {
-        return address;
+    public List<Address> getShippingAddresses() {
+        return shippingAddresses;
+    }
+
+    public List<Address> getBillingAddresses() {
+        return billingAddresses;
     }
 }
