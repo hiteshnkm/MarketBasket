@@ -1,20 +1,15 @@
-import models.Address;
 import models.Customer;
 import utils.Connection;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +22,10 @@ public class BasketGUI {
     public BasketGUI() {
         // Make items in item table not draggable
         itemTable.getTableHeader().setReorderingAllowed(false);
+
+        // Disable the cart and orders tab initially, since a user will not be logged in
+        tabPane.setEnabledAt(2, false);
+        tabPane.setEnabledAt(3, false);
 
         loginButton.addActionListener(new ActionListener() {
             @Override
@@ -155,11 +154,18 @@ public class BasketGUI {
             cartItemTable.setRowHeight(35);
             cartItemTable.setIntercellSpacing(new Dimension(5, 5));
 
+            // When the customer is logged in we want to allow them to go to the cart and orders tab
+            tabPane.setEnabledAt(2, true);
+            tabPane.setEnabledAt(3, true);
             tabPane.repaint();
         }
     }
 
     private void logout() {
+        // Disable the cart and orders tabs since the user logged out
+        tabPane.setEnabledAt(2, false);
+        tabPane.setEnabledAt(3, false);
+
         Connection.setLoggedInCustomer(null);
         tabPane.setComponentAt(0, homePanel);
         tabPane.repaint();
