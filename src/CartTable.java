@@ -24,10 +24,16 @@ public class CartTable extends AbstractTableModel {
     private static List<Map> itemList = new ArrayList<Map>();
     private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
     private Customer loggedInCustomer;
+    private JButton placeButton;
 
-    public CartTable (){
+    public CartTable (JButton placeButton){
+        this.placeButton = placeButton;
         loggedInCustomer = Connection.getLoggedInCustomer();
         itemList = loggedInCustomer.getCartItems();
+    }
+
+    public void clearItems(){
+        itemList.clear();
     }
 
     @Override public int getColumnCount() {
@@ -64,6 +70,11 @@ public class CartTable extends AbstractTableModel {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
                         loggedInCustomer.removeItemFromCart(rowIndex);
+                        if (itemList.size() < 1) {
+                            placeButton.setEnabled(false);
+                        }else{
+                            placeButton.setEnabled(true);
+                        }
                     }
                 });
                 return removeItem;

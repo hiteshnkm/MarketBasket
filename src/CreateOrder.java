@@ -1,6 +1,4 @@
-import models.Address;
-import models.Customer;
-import models.Item;
+import models.*;
 import utils.Connection;
 
 import javax.swing.*;
@@ -35,17 +33,17 @@ public class CreateOrder extends JDialog {
         shippingAddressList = loggedInCustomer.getShippingAddresses();
         billingAddressList = loggedInCustomer.getBillingAddresses();
 
-
-
         DefaultComboBoxModel shippingModel = new DefaultComboBoxModel();
         for (int i = 0; i < shippingAddressList.size(); i++) {
             shippingModel.addElement(shippingAddressList.get(i).getAddressLine());
         }
+        shippingAddress.setModel(shippingModel);
 
         DefaultComboBoxModel billingModel = new DefaultComboBoxModel();
         for (int i = 0; i < billingAddressList.size(); i++) {
             billingModel.addElement(billingAddressList.get(i).getAddressLine());
         }
+        billingAddress.setModel(billingModel);
 
         double subtotal = 0.0;
 
@@ -63,9 +61,9 @@ public class CreateOrder extends JDialog {
 
             listModel.addElement(item.getItemName() + " x " + quantity + "\t" + currencyFormat.format(itemCost));
         }
-
-        double taxAmount = subtotal * .04;
-        double totalPrice = subtotal + taxAmount;
+        final double subtotalAmt = subtotal;
+        final double taxAmount = subtotal * .04;
+        final double totalPrice = subtotal + taxAmount;
 
         subtotalLabel.setText(currencyFormat.format(subtotal));
         taxesLabel.setText(currencyFormat.format(taxAmount));
@@ -77,6 +75,22 @@ public class CreateOrder extends JDialog {
 
         placeOrder.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                int shipAddressIndex = shippingAddress.getSelectedIndex();
+                int billAddressIndex = billingAddress.getSelectedIndex();
+
+                Address shipAddress = shippingAddressList.get(shipAddressIndex);
+                Address billAddress = billingAddressList.get(billAddressIndex);
+
+                Order createdOrder = Order.createNewOrder(loggedInCustomer, subtotalAmt, taxAmount, totalPrice, shipAddress, billAddress);
+                for(int i=0; i<orderItems.size(); i++){
+                    Map itemMap = orderItems.get(i);
+
+                    Item item = (Item) itemMap.get("item");
+                    Integer quantity = (Integer) itemMap.get("quantity");
+
+                    OrderLineItem.createOrderLine(createdOrder, item, quantity);
+                }
+                JOptionPane.showMessageDialog(JOptionPane.getFrameForComponent(placeOrder), "Order successfully placed. Thank You!", "Order Placed", JOptionPane.PLAIN_MESSAGE);
                 onOK();
             }
         });
@@ -104,7 +118,6 @@ public class CreateOrder extends JDialog {
     }
 
     private void onOK() {
-
         dispose();
     }
 

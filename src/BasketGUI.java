@@ -5,7 +5,10 @@ import utils.Connection;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -28,21 +31,93 @@ public class BasketGUI {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                login(usernameField.getText(), loginPasswordField.getPassword());
+                final JFrame loginMessage = Connection.createLoadingFrame("Authenticating user...");
+                // Run the login process in the background and display a notification when the process finishes
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>(){
+                    @Override
+                    public Void doInBackground(){
+                        login(usernameField.getText(), loginPasswordField.getPassword());
+                        return null;
+                    }
+
+                    @Override
+                    public void done(){
+                        loginMessage.dispose();
+                    }
+                };
+                worker.execute();
             }
         });
+
+
         tabPane.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent changeEvent) {
+
+                TableModel cartModel = cartItemTable.getModel();
+                // Check to see if the cart table model has been initialized
+                if (cartModel instanceof CartTable) {
+                    // If the table contains no items we disable the place order button
+                    if (((CartTable) cartModel).getCartItems().size() < 1) {
+                        placeOrder.setEnabled(false);
+                    }
+                    // We have items now so we re-enable the button
+                    else {
+                        placeOrder.setEnabled(true);
+                    }
+                }
+                // The cart table model has not been set which means there are no items in the table
+                // so the customer should not be able to place an ad.
+                else{
+                    placeOrder.setEnabled(false);
+                }
+
                 // Refresh our cart when that tab is selected
-                if(tabPane.getSelectedIndex() == 2) {
-                    CartTable cartTable = new CartTable();
+                if (tabPane.getSelectedIndex() == 2) {
+                    CartTable cartTable = new CartTable(placeOrder);
                     cartItemTable.setModel(cartTable);
                     cartItemTable.getColumn("Remove").setCellRenderer(new JTableButtonRenderer());
-                    tabPane.repaint();
                 }
+                else if (tabPane.getSelectedIndex() == 3) {
+
+                    final JFrame orderLoading = Connection.createLoadingFrame("Loading order history");
+
+                    // Swing worker that will pull the order information for the logged in customer
+                    // will display a loading message while it runs in the background
+                    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>(){
+                        @Override
+                        public Void doInBackground(){
+                            TableModel tableModel = orderTable.getModel();
+
+                            // If the table model is an instance of OrderTable then
+                            // we only need to get the latest orders and not all of them.
+                            if (tableModel instanceof OrderTable) {
+                                ((OrderTable) tableModel).updateOrders();
+                                return null;
+                            }
+
+                            OrderTable orderModel = new OrderTable(Connection.getLoggedInCustomer());
+                            orderTable.setModel(orderModel);
+                            orderTable.setIntercellSpacing(new Dimension(5, 5));
+                            orderTable.setRowHeight(35);
+
+                            JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
+                            orderTable.getColumn("View Details").setCellRenderer(buttonRenderer);
+                            orderTable.getColumn("Make Payment").setCellRenderer(buttonRenderer);
+                            return null;
+                        }
+
+                        @Override
+                        public void done(){
+                            orderLoading.dispose();
+                        }
+                    };
+                    worker.execute();
+                }
+                tabPane.getRootPane().repaint();
             }
         });
+
         placeOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -51,6 +126,8 @@ public class BasketGUI {
                 order.pack();
                 order.setLocationRelativeTo(JOptionPane.getFrameForComponent(placeOrder));
                 order.setVisible(true);
+                ((CartTable) cartItemTable.getModel()).clearItems();
+                cartItemTable.repaint();
             }
         });
     }
@@ -73,16 +150,6 @@ public class BasketGUI {
                 }
             });
             tabPane.setComponentAt(0, homeScreen.getMainPanel());
-
-            OrderTable orderModel = new OrderTable(Connection.getLoggedInCustomer());
-            orderTable.setModel(orderModel);
-
-            orderTable.setIntercellSpacing(new Dimension(5, 5));
-            orderTable.setRowHeight(35);
-
-            JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
-            orderTable.getColumn("View Details").setCellRenderer(buttonRenderer);
-            orderTable.getColumn("Make Payment").setCellRenderer(buttonRenderer);
 
             cartItemTable.addMouseListener(new JTableButtonMouseListener(cartItemTable));
             cartItemTable.setRowHeight(35);

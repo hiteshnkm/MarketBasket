@@ -1,9 +1,6 @@
 package utils;
 
-import models.Address;
-import models.Customer;
-import models.Item;
-import models.Order;
+import models.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -53,9 +50,9 @@ public class Connection {
         return ConnectionHolder.CONN;
     }
 
-    private static JFrame createLoadingFrame(String message) {
-        JFrame messageFrame = new JFrame();
-        JPanel panel = (JPanel) messageFrame.getContentPane();
+    public static JFrame createLoadingFrame(String message) {
+        final JFrame messageFrame = new JFrame();
+        final JPanel panel = (JPanel) messageFrame.getContentPane();
         panel.setBorder(new EmptyBorder(10,10,10,10));
         JLabel messageLabel = new JLabel(message);
         panel.add(messageLabel);
@@ -73,7 +70,11 @@ public class Connection {
         java.sql.Connection connection = getConnection();
         ResultSet results;
         try {
-            PreparedStatement statement = connection.prepareStatement(sqlQuery, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            PreparedStatement statement = connection.prepareStatement(sqlQuery, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE, Statement.RETURN_GENERATED_KEYS);
+            ResultSet keys = statement.getGeneratedKeys();
+            while (keys.next()) {
+                JOptionPane.showMessageDialog(null, keys.getString(0));
+            }
             // Add all of the arguments to the sql query
             for (int i = 0; i < args.length; i++) {
                 int index = i + 1;
@@ -124,6 +125,21 @@ public class Connection {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Error loading orders from database.", JOptionPane.ERROR_MESSAGE);
             return null;
         }
+    }
+
+    public OrderLineItem getOrderLineFromQuery(ResultSet orderResult) {
+        try {
+            long lineID = orderResult.getInt("LINEID");
+            long itemID = orderResult.getInt("ITEMID");
+            long orderID = orderResult.getInt("ORDERID");
+            double amtMoney = orderResult.getDouble("AMTMONEY");
+            int itemQuantity = orderResult.getInt("ITEMQUANTITY");
+
+            return new OrderLineItem(lineID, itemID, orderID, amtMoney, itemQuantity);
+        } catch(SQLException ex){
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     public static Customer getLoggedInCustomer() {

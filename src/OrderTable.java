@@ -22,14 +22,23 @@ public class OrderTable  extends AbstractTableModel {
     private static final Class<?>[] COLUMN_TYPES = new Class<?>[] {int.class, String.class, Long.class, JButton.class,  JButton.class};
     private static ArrayList<Order> orderList = new ArrayList<Order>();
     private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+    private int customerID;
 
-    public OrderTable(Customer customer){
-        int customerID = customer.getCustomerID();
+    public OrderTable(Customer customer) {
+        customerID = customer.getCustomerID();
         ResultSet orderResults = Connection.getResultsFromQuery("select * from orders where customerid = ?", String.valueOf(customerID));
+        addOrdersToList(orderResults);
+    }
 
+    public void updateOrders() {
+        ResultSet orderResults = Connection.getResultsFromQuery("select * from orders where customerid = ? and orderid > ?", String.valueOf(customerID), String.valueOf(orderList.size()));
+        addOrdersToList(orderResults);
+    }
+
+    private void addOrdersToList(ResultSet resultSet) {
         try {
-            while (orderResults.next()) {
-                Order dbOrder = Connection.createOrderFromQuery(orderResults);
+            while (resultSet.next()) {
+                Order dbOrder = Connection.createOrderFromQuery(resultSet);
                 if(dbOrder != null) {
                     orderList.add(dbOrder);
                 }

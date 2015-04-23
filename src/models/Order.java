@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 
 /**
  * Created by Dr.H on 4/17/2015.
@@ -34,21 +35,23 @@ public class Order {
         BillingAddress = billingAddress;
     }
 
-    public boolean createNewOrder(Customer customer, double subTotal, double taxes, double totalPrice, Address shippingAddress, Address billingAddress){
-        String sqlQuery = "insert into orders (" +
+    public static Order createNewOrder(Customer customer, double subTotal, double taxes, double totalPrice, Address shippingAddress, Address billingAddress){
+        String sqlQuery = "insert into ORDERS (" +
                 "CUSTOMERID, ORDERDATE, " +
                 "SUBTOTAL, TAXES, " +
                 "TOTALPRICE, SHIPPINGNAME, " +
                 "SHIPADDRESS, BILLINGADDRESS" +
                 ")" +
                 "VALUES (" +
-                "?, ?, ?, ?, ?, ?, ?, ?);";
+                "?, TO_DATE(?, 'MM/DD/YYYY'), ?, ?, ?, ?, ?, ?)";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/YYYY");
+
         java.sql.Date sqlDate = new java.sql.Date(new java.util.Date().getTime());
         ResultSet createOrderResult = Connection.getResultsFromQuery(
                 sqlQuery,
                 // Parameters to the sql query
                 String.valueOf(customer.getCustomerID()),
-                String.valueOf(sqlDate),
+                dateFormat.format(sqlDate),
                 String.valueOf(subTotal),
                 String.valueOf(taxes),
                 String.valueOf(totalPrice),
@@ -56,14 +59,17 @@ public class Order {
                 String.valueOf(shippingAddress.getAddressid()),
                 String.valueOf(billingAddress.getAddressid())
         );
-        try {
-            while(createOrderResult.next()){
-                JOptionPane.showMessageDialog(null, createOrderResult.getString(0));
+
+        String getNewCustomerQuery = "select * from orders where orderid = (select max(orderid) from orders)";
+        ResultSet lastCreatedOrder = Connection.getResultsFromQuery(getNewCustomerQuery);
+        try{
+            while(lastCreatedOrder.next()){
+                return Connection.createOrderFromQuery(lastCreatedOrder);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch(SQLException ex){
+            ex.printStackTrace();
         }
-        return true;
+        return null;
     }
 
     public long getOrderid() {
