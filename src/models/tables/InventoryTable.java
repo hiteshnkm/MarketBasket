@@ -30,7 +30,7 @@ public class InventoryTable  extends AbstractTableModel {
 
         try {
             while (inventoryResults.next()) {
-                Item dbItem = Connection.createItemFromQuery(inventoryResults);
+                Item dbItem = Item.createItemFromQuery(inventoryResults);
                 if(dbItem != null) {
                     itemList.add(dbItem);
                 }

@@ -39,7 +39,7 @@ public class OrderTable  extends AbstractTableModel {
     private void addOrdersToList(ResultSet resultSet) {
         try {
             while (resultSet.next()) {
-                Order dbOrder = Connection.createOrderFromQuery(resultSet);
+                Order dbOrder = Order.createOrderFromQuery(resultSet);
                 if(dbOrder != null) {
                     orderList.add(dbOrder);
                 }

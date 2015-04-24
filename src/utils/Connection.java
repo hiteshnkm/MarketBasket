@@ -23,6 +23,13 @@ public class Connection {
 
         private static java.sql.Connection CONN = createConnection();
     }
+
+    /**
+     * Create the initial connection to the database. Will only make the connection once. Uses a singleton to store
+     * an instance of the connection.
+     *
+     * @return Connection object.
+     */
     private static java.sql.Connection createConnection() {
 
         java.sql.Connection conn = null;
@@ -50,6 +57,12 @@ public class Connection {
         return ConnectionHolder.CONN;
     }
 
+    /**
+     * A helper function that is used to create headless loading messages.
+     *
+     * @param message the text to display in the frame
+     * @return the JFrame instance of the message box.
+     */
     public static JFrame createLoadingFrame(String message) {
         final JFrame messageFrame = new JFrame();
         final JPanel panel = (JPanel) messageFrame.getContentPane();
@@ -66,6 +79,22 @@ public class Connection {
         return messageFrame;
     }
 
+    /**
+     * Helper function for running a sql query on the database.
+     *
+     * Use this helper method to make calls to the database. The SQL query string must have a '?' where
+     * you want to insert a variable that was passed through in args. SQL query must also not end with a ';'.
+     *
+     * The below example is how you would use the function to execute a call to get information for the item
+     * with an itemid of 1.
+     *
+     * Ex.
+     *  ResultSet queryResults = Connection.getResultsFromQuery("select * from items where itemid = ?", "1");
+     *
+     * @param sqlQuery the SQL query string to execute
+     * @param args pass any number of string arguments that need to be inserted into the sql query
+     * @return ResultSet object which can be used to pull the results of the query.
+     */
     public static ResultSet getResultsFromQuery(String sqlQuery, String... args){
         java.sql.Connection connection = getConnection();
         ResultSet results;
@@ -88,44 +117,6 @@ public class Connection {
         return results;
     }
 
-    public static Item createItemFromQuery(ResultSet inventoryResults) {
-        try {
-            Long itemid = inventoryResults.getLong("itemid");
-            String itemname = inventoryResults.getString("itemname");
-            String description = inventoryResults.getString("description");
-            String category = inventoryResults.getString("category_type");
-            Double price = inventoryResults.getDouble("price");
-            int quantity = inventoryResults.getInt("quantity");
-
-            return new Item(itemid, itemname, description, category, price, quantity);
-        } catch(SQLException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage(), "Error loading items from database.", JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-    }
-
-    public static Order createOrderFromQuery(ResultSet orderResults) {
-        try {
-            long orderid = orderResults.getLong("ORDERID");
-            int customerid = orderResults.getInt("CUSTOMERID");
-            java.sql.Date orderDate = orderResults.getDate("ORDERDATE");
-            double subTotal = orderResults.getDouble("SUBTOTAL");
-            double taxes = orderResults.getDouble("TAXES");
-            double totalPrice = orderResults.getDouble("TOTALPRICE");
-            String shippingName = orderResults.getString("SHIPPINGNAME");
-            int shippingAddressID = orderResults.getInt("SHIPADDRESS");
-            Address shippingAddress = Address.getAddressByID(shippingAddressID);
-            int billingAddressID = orderResults.getInt("BILLINGADDRESS");
-            Address billingAddress = Address.getAddressByID((billingAddressID));
-
-            return new Order(orderid, customerid, orderDate, subTotal,
-                    taxes, totalPrice, shippingName, shippingAddress, billingAddress);
-
-        } catch (SQLException ex){
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error loading orders from database.", JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-    }
 
     public OrderLineItem getOrderLineFromQuery(ResultSet orderResult) {
         try {
@@ -142,15 +133,20 @@ public class Connection {
         return null;
     }
 
+    /**
+     * Gets the current logged in customer.
+     * @return a Customer object or null if not logged in.
+     */
     public static Customer getLoggedInCustomer() {
         return loggedInCustomer;
     }
 
+    /**
+     * Sets the logged in customer
+     * @param loggedInCustomer the customer that just logged in.
+     */
     public static void setLoggedInCustomer(Customer loggedInCustomer) {
         Connection.loggedInCustomer = loggedInCustomer;
     }
 
-    public static void placeOrder(Item rowItem) {
-        Customer currentCustomer = getLoggedInCustomer();
-    }
 }

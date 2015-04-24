@@ -33,10 +33,9 @@ public class BasketGUI {
         // Make items in item table not draggable
         itemTable.getTableHeader().setReorderingAllowed(false);
 
-        final String[] itemReports = {"Average item price.", "Get most expensive and least expensive item."};
-        final String[] itemQueries = {"Select avg(Price) as AveragePrices from Item", "SELECT * FROM ITEM ORDER BY PRICE DESC"};
         DefaultComboBoxModel itemReportModel = new DefaultComboBoxModel<String>(itemReports);
         itemReportOptions.setModel(itemReportModel);
+
         itemReportBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -46,32 +45,12 @@ public class BasketGUI {
                 SwingWorker<Void, Void> reportWorker = new SwingWorker<Void, Void>() {
                     @Override
                     protected Void doInBackground() throws Exception {
+                        // Get the selected item report
                         int selectedReportIndex = itemReportOptions.getSelectedIndex();
 
-                        String selectedReport = itemReports[selectedReportIndex];
-                        String selectedReportQuery = itemQueries[selectedReportIndex];
-
-                        ArrayList<String[]> result = new ArrayList<String[]>();
-                        ResultSet queryResult = Connection.getResultsFromQuery(selectedReportQuery);
-                        try {
-                            ResultSetMetaData resultData = queryResult.getMetaData();
-                            int columnCount = resultData.getColumnCount();
-
-                            String[] columnNames = new String[columnCount];
-                            while (queryResult.next()) {
-                                String[] row = new String[columnCount];
-                                for (int i = 0; i < columnCount; i++) {
-                                    if (queryResult.isFirst())
-                                        columnNames[i] = resultData.getColumnLabel(i + 1);
-                                    row[i] = queryResult.getString(i + 1);
-                                }
-                                result.add(row);
-                            }
-                            generatingReportMessage.dispose();
-                            ReportTable reportTable = new ReportTable(columnNames, result);
-                            ReportDialog reportDialog = new ReportDialog(selectedReport, reportTable);
-                            reportDialog.pack();
-                            reportDialog.setVisible(true);
+                        try{
+                            // Create the report
+                            generateReport(generatingReportMessage, itemReports, itemQueries, selectedReportIndex);
                         } catch (SQLException ex) {
                             JOptionPane.showMessageDialog(null, ex.getMessage(), "Error generating report", JOptionPane.ERROR_MESSAGE);
                         }
@@ -188,6 +167,46 @@ public class BasketGUI {
                 cartItemTable.repaint();
             }
         });
+    }
+
+    /**
+     * Method to show the specified report. This run the specified query from the given list of queries, and will
+     * create and show a report dialog containing the results of the query.
+     *
+     * The report list and the query list indices must align. Meaning that the sql query for the report at
+     * reportList[0] must exist at queryList[0].
+     *
+     * @param generatingReportMessage the loading notification window to close on completion.
+     * @param reportList the list of all the reports
+     * @param queryList the list of all of the queries
+     * @param selectedReportIndex the index of the report that was selected
+     * @throws SQLException
+     */
+    private static void generateReport(JFrame generatingReportMessage, String[] reportList, String[] queryList, int selectedReportIndex) throws SQLException{
+        String selectedReport = reportList[selectedReportIndex];
+        String selectedReportQuery = queryList[selectedReportIndex];
+
+        ResultSet queryResult = Connection.getResultsFromQuery(selectedReportQuery);
+
+        ArrayList<String[]> result = new ArrayList<String[]>();
+        ResultSetMetaData resultData = queryResult.getMetaData();
+        int columnCount = resultData.getColumnCount();
+
+        String[] columnNames = new String[columnCount];
+        while (queryResult.next()) {
+            String[] row = new String[columnCount];
+            for (int i = 0; i < columnCount; i++) {
+                if (queryResult.isFirst())
+                    columnNames[i] = resultData.getColumnLabel(i + 1);
+                row[i] = queryResult.getString(i + 1);
+            }
+            result.add(row);
+        }
+        generatingReportMessage.dispose();
+        ReportTable reportTable = new ReportTable(columnNames, result);
+        ReportDialog reportDialog = new ReportDialog(selectedReport, reportTable);
+        reportDialog.pack();
+        reportDialog.setVisible(true);
     }
 
     private void login(String text, char[] password) {
@@ -331,4 +350,6 @@ public class BasketGUI {
     private HomeScreen homeScreen;
 
     // Other variables
+    private static final String[] itemReports = {"Average item price.", "Get most expensive and least expensive item."};
+    private static final String[] itemQueries = {"Select avg(Price) as AveragePrices from Item", "SELECT * FROM ITEM ORDER BY PRICE DESC"};
 }

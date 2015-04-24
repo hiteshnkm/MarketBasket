@@ -2,6 +2,7 @@ package models.db;
 
 import utils.Connection;
 
+import javax.swing.*;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -63,12 +64,35 @@ public class Order {
         ResultSet lastCreatedOrder = Connection.getResultsFromQuery(getNewCustomerQuery);
         try{
             while(lastCreatedOrder.next()){
-                return Connection.createOrderFromQuery(lastCreatedOrder);
+                return createOrderFromQuery(lastCreatedOrder);
             }
         } catch(SQLException ex){
             ex.printStackTrace();
         }
         return null;
+    }
+
+    public static Order createOrderFromQuery(ResultSet orderResults) {
+        try {
+            long orderid = orderResults.getLong("ORDERID");
+            int customerid = orderResults.getInt("CUSTOMERID");
+            Date orderDate = orderResults.getDate("ORDERDATE");
+            double subTotal = orderResults.getDouble("SUBTOTAL");
+            double taxes = orderResults.getDouble("TAXES");
+            double totalPrice = orderResults.getDouble("TOTALPRICE");
+            String shippingName = orderResults.getString("SHIPPINGNAME");
+            int shippingAddressID = orderResults.getInt("SHIPADDRESS");
+            Address shippingAddress = Address.getAddressByID(shippingAddressID);
+            int billingAddressID = orderResults.getInt("BILLINGADDRESS");
+            Address billingAddress = Address.getAddressByID((billingAddressID));
+
+            return new Order(orderid, customerid, orderDate, subTotal,
+                    taxes, totalPrice, shippingName, shippingAddress, billingAddress);
+
+        } catch (SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error loading orders from database.", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
     }
 
     public long getOrderid() {
