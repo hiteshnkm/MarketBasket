@@ -1,8 +1,7 @@
-package models;
+package models.db;
 
 import utils.Connection;
 
-import javax.swing.*;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;

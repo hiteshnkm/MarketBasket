@@ -1,6 +1,7 @@
-import models.Customer;
-import models.Item;
-import models.Order;
+package models.tables;
+
+import models.db.Customer;
+import models.db.Order;
 import utils.Connection;
 
 import javax.swing.*;

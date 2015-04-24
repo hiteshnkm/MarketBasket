@@ -1,28 +1,22 @@
-import models.Item;
+package gui.dialogs;
+
+import models.tables.ReportTable;
 
 import javax.swing.*;
 import java.awt.event.*;
-import java.text.NumberFormat;
 
-public class ItemDetail extends JDialog {
+public class ReportDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JLabel itemHeader;
-    private JLabel descriptionLabel;
-    private JLabel categoryLabel;
-    private JLabel quantityLabel;
-    private JLabel priceLabel;
-    private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+    private JTable reportTable;
+    private JLabel reportTitle;
 
-    public ItemDetail(Item item) {
+    public ReportDialog(String reportName, ReportTable reportTableModel) {
+        reportTitle.setText(reportName);
+        reportTable.setModel(reportTableModel);
 
-        itemHeader.setText(item.getItemName());
-        descriptionLabel.setText(item.getDescription());
-        categoryLabel.setText(item.getCategoryType());
-        quantityLabel.setText(String.valueOf(item.getQuantity()));
-        priceLabel.setText(currencyFormat.format(item.getPrice()));
-
+        setLocationRelativeTo(null);
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -39,7 +33,7 @@ public class ItemDetail extends JDialog {
             }
         });
 
-// call onCancel() when cross is clicked
+        // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -47,7 +41,7 @@ public class ItemDetail extends JDialog {
             }
         });
 
-// call onCancel() on ESCAPE
+        // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();

@@ -1,4 +1,12 @@
-import models.Customer;
+package gui;
+
+import gui.dialogs.CreateOrder;
+import gui.dialogs.ReportDialog;
+import models.db.Customer;
+import models.tables.CartTable;
+import models.tables.InventoryTable;
+import models.tables.OrderTable;
+import models.tables.ReportTable;
 import utils.Connection;
 
 import javax.swing.*;
@@ -10,8 +18,10 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * William Trent Holliday
@@ -22,6 +32,55 @@ public class BasketGUI {
     public BasketGUI() {
         // Make items in item table not draggable
         itemTable.getTableHeader().setReorderingAllowed(false);
+
+        final String[] itemReports = {"Average item price.", "Get most expensive and least expensive item."};
+        final String[] itemQueries = {"Select avg(Price) as AveragePrices from Item", "SELECT * FROM ITEM ORDER BY PRICE DESC"};
+        DefaultComboBoxModel itemReportModel = new DefaultComboBoxModel<String>(itemReports);
+        itemReportOptions.setModel(itemReportModel);
+        itemReportBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                final JFrame generatingReportMessage = Connection.createLoadingFrame("Generating report...");
+                generatingReportMessage.setVisible(true);
+
+                SwingWorker<Void, Void> reportWorker = new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        int selectedReportIndex = itemReportOptions.getSelectedIndex();
+
+                        String selectedReport = itemReports[selectedReportIndex];
+                        String selectedReportQuery = itemQueries[selectedReportIndex];
+
+                        ArrayList<String[]> result = new ArrayList<String[]>();
+                        ResultSet queryResult = Connection.getResultsFromQuery(selectedReportQuery);
+                        try {
+                            ResultSetMetaData resultData = queryResult.getMetaData();
+                            int columnCount = resultData.getColumnCount();
+
+                            String[] columnNames = new String[columnCount];
+                            while (queryResult.next()) {
+                                String[] row = new String[columnCount];
+                                for (int i = 0; i < columnCount; i++) {
+                                    if (queryResult.isFirst())
+                                        columnNames[i] = resultData.getColumnLabel(i + 1);
+                                    row[i] = queryResult.getString(i + 1);
+                                }
+                                result.add(row);
+                            }
+                            generatingReportMessage.dispose();
+                            ReportTable reportTable = new ReportTable(columnNames, result);
+                            ReportDialog reportDialog = new ReportDialog(selectedReport, reportTable);
+                            reportDialog.pack();
+                            reportDialog.setVisible(true);
+                        } catch (SQLException ex) {
+                            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error generating report", JOptionPane.ERROR_MESSAGE);
+                        }
+                        return null;
+                    }
+                };
+                reportWorker.execute();
+            }
+        });
 
         // Disable the cart and orders tab initially, since a user will not be logged in
         tabPane.setEnabledAt(2, false);
@@ -55,7 +114,7 @@ public class BasketGUI {
 
                 TableModel cartModel = cartItemTable.getModel();
                 // Check to see if the cart table model has been initialized
-                if (cartModel instanceof CartTable) {
+                if (cartModel instanceof ReportTable) {
                     // If the table contains no items we disable the place order button
                     if (((CartTable) cartModel).getCartItems().size() < 1) {
                         placeOrder.setEnabled(false);
@@ -73,8 +132,8 @@ public class BasketGUI {
 
                 // Refresh our cart when that tab is selected
                 if (tabPane.getSelectedIndex() == 2) {
-                    CartTable cartTable = new CartTable(placeOrder);
-                    cartItemTable.setModel(cartTable);
+                    CartTable reportTable = new CartTable(placeOrder);
+                    cartItemTable.setModel(reportTable);
                     cartItemTable.getColumn("Remove").setCellRenderer(new JTableButtonRenderer());
                 }
                 else if (tabPane.getSelectedIndex() == 3) {
@@ -125,7 +184,7 @@ public class BasketGUI {
                 order.pack();
                 order.setLocationRelativeTo(JOptionPane.getFrameForComponent(placeOrder));
                 order.setVisible(true);
-                ((CartTable) cartItemTable.getModel()).clearItems();
+                ((ReportTable) cartItemTable.getModel()).clearItems();
                 cartItemTable.repaint();
             }
         });
@@ -261,6 +320,14 @@ public class BasketGUI {
     private JTable cartItemTable;
     private JScrollPane cartTab;
     private JButton placeOrder;
+    private JComboBox itemReportOptions;
+    private JButton itemReportBtn;
+    private JComboBox orderReportOptions;
+    private JComboBox customerReportOptions;
+    private JComboBox paymentReportOptions;
+    private JButton orderReportBtn;
+    private JButton customerReportBtn;
+    private JButton paymentReportBtn;
     private HomeScreen homeScreen;
 
     // Other variables

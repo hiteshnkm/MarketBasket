@@ -1,6 +1,6 @@
 package utils;
 
-import models.*;
+import models.db.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

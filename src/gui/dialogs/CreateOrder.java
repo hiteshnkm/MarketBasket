@@ -1,4 +1,6 @@
-import models.*;
+package gui.dialogs;
+
+import models.db.*;
 import utils.Connection;
 
 import javax.swing.*;

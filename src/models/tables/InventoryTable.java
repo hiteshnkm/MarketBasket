@@ -1,5 +1,8 @@
-import models.Customer;
-import models.Item;
+package models.tables;
+
+import gui.dialogs.BuyItem;
+import gui.dialogs.ItemDetail;
+import models.db.Item;
 import utils.Connection;
 
 import javax.swing.*;

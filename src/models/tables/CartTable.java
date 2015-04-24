@@ -1,13 +1,13 @@
-import models.Customer;
-import models.Item;
+package models.tables;
+
+import models.db.Customer;
+import models.db.Item;
 import utils.Connection;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;

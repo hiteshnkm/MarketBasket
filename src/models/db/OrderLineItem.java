@@ -1,9 +1,8 @@
-package models;
+package models.db;
 
 import utils.Connection;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * William Trent Holliday

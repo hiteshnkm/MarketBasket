@@ -1,5 +1,6 @@
-import models.Address;
-import models.Customer;
+package gui;
+
+import models.db.Customer;
 
 import javax.swing.*;
 
