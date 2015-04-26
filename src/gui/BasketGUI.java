@@ -36,30 +36,12 @@ public class BasketGUI {
         DefaultComboBoxModel itemReportModel = new DefaultComboBoxModel<String>(itemReports);
         itemReportOptions.setModel(itemReportModel);
 
-        itemReportBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                final JFrame generatingReportMessage = Connection.createLoadingFrame("Generating report...");
-                generatingReportMessage.setVisible(true);
+        itemReportBtn.addActionListener(new ReportButtonEvent(itemReportOptions, itemReports, itemQueries));
 
-                SwingWorker<Void, Void> reportWorker = new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        // Get the selected item report
-                        int selectedReportIndex = itemReportOptions.getSelectedIndex();
+        DefaultComboBoxModel<String> orderReportModel = new DefaultComboBoxModel<String>(orderReports);
+        orderReportOptions.setModel(orderReportModel);
 
-                        try{
-                            // Create the report
-                            generateReport(generatingReportMessage, itemReports, itemQueries, selectedReportIndex);
-                        } catch (SQLException ex) {
-                            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error generating report", JOptionPane.ERROR_MESSAGE);
-                        }
-                        return null;
-                    }
-                };
-                reportWorker.execute();
-            }
-        });
+        orderReportBtn.addActionListener(new ReportButtonEvent(orderReportOptions, orderReports, orderQueries));
 
         // Disable the cart and orders tab initially, since a user will not be logged in
         tabPane.setEnabledAt(2, false);
@@ -90,30 +72,20 @@ public class BasketGUI {
         tabPane.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent changeEvent) {
-
-                TableModel cartModel = cartItemTable.getModel();
-                // Check to see if the cart table model has been initialized
-                if (cartModel instanceof ReportTable) {
-                    // If the table contains no items we disable the place order button
-                    if (((CartTable) cartModel).getCartItems().size() < 1) {
-                        placeOrder.setEnabled(false);
-                    }
-                    // We have items now so we re-enable the button
-                    else {
-                        placeOrder.setEnabled(true);
-                    }
-                }
-                // The cart table model has not been set which means there are no items in the table
-                // so the customer should not be able to place an ad.
-                else{
-                    placeOrder.setEnabled(false);
-                }
-
                 // Refresh our cart when that tab is selected
                 if (tabPane.getSelectedIndex() == 2) {
-                    CartTable reportTable = new CartTable(placeOrder);
-                    cartItemTable.setModel(reportTable);
+                    CartTable cartTable = new CartTable(placeOrder);
+                    cartItemTable.setModel(cartTable);
                     cartItemTable.getColumn("Remove").setCellRenderer(new JTableButtonRenderer());
+
+                    // If there are no items in the cart then we want to disable the place order button
+                    if(cartTable.getCartItems().size() < 1){
+                        placeOrder.setEnabled(false);
+                    }
+                    // Should be enabled for items in the cart
+                    else{
+                        placeOrder.setEnabled(true);
+                    }
                 }
                 else if (tabPane.getSelectedIndex() == 3) {
 
@@ -167,6 +139,41 @@ public class BasketGUI {
                 cartItemTable.repaint();
             }
         });
+    }
+
+    private class ReportButtonEvent implements ActionListener{
+
+        private JComboBox dropDownBox;
+        private String[] reports;
+        private String[] queries;
+
+        public ReportButtonEvent(JComboBox dropDownBox, String[] reports, String[] queries){
+            this.dropDownBox = dropDownBox;
+            this.reports = reports;
+            this.queries = queries;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            final JFrame generatingReportMessage = Connection.createLoadingFrame("Generating report...");
+            generatingReportMessage.setVisible(true);
+
+            SwingWorker<Void, Void> reportWorker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    // Get the selected item report
+                    int selectedReportIndex = dropDownBox.getSelectedIndex();
+                    try{
+                        // Create the report
+                        generateReport(generatingReportMessage, reports, queries, selectedReportIndex);
+                    } catch (SQLException ex) {
+                        JOptionPane.showMessageDialog(null, ex.getMessage(), "Error generating report", JOptionPane.ERROR_MESSAGE);
+                    }
+                    return null;
+                }
+            };
+            reportWorker.execute();
+        }
     }
 
     /**
@@ -352,4 +359,38 @@ public class BasketGUI {
     // Other variables
     private static final String[] itemReports = {"Average item price.", "Get most expensive and least expensive item."};
     private static final String[] itemQueries = {"Select avg(Price) as AveragePrices from Item", "SELECT * FROM ITEM ORDER BY PRICE DESC"};
+
+    private static final String[] orderReports = {
+            "Number of orders per customer", "Number of orders by state",
+            "Average order price", "Total money spent by customer",
+            "Average time to ship order", "Number of orders by month",
+            "Number of orders by day of week", "Number of orders by zip",
+            "Orders not yet shipped", "Top 5 most expensive orders"
+    };
+    private static final String[] orderQueries = {
+            "select customers.firstname, customers.lastname, count(orders.customerid) as \"Number Of Orders\" from customers\n" +
+                    "join orders on orders.customerid = customers.customerid\n" +
+                    "group by customers.firstname, customers.lastname\n" +
+                    "order by \"Number Of Orders\" desc\n",
+            "select address.state, count(orderid) as \"Number of Orders\" from orders\n" +
+                    "join address on address.addressid = orders.shipaddress\n" +
+                    "group by address.state",
+            "select to_char(avg(totalprice), 'fm9999999.90') as \"Average Price\" from orders",
+            "select firstname, lastname, sum(orders.totalprice) as \"Total Money Spent\" from customers\n" +
+                    "join orders on orders.customerid = customers.customerid\n" +
+                    "group by firstname, lastname",
+            "select avg(shippeddate - orderdate) || ' days' as \"Avg Time to Ship\" from orders",
+            "select to_char(orderdate, 'Month') as \"Month\", count(orderdate) as \"Number of orders\" from orders\n" +
+                    "group by to_char(orderdate, 'Month') order by \"Number of orders\" desc",
+            "select to_char(orderdate, 'Day') as \"Day\", count(orderdate) as \"Number of orders\" from orders\n" +
+                    "group by to_char(orderdate, 'Day') order by \"Number of orders\" desc",
+            "select address.zip, count(billingaddress) as \"Number of orders\" from orders\n" +
+                    "join address on addressid = billingaddress\n" +
+                    "group by address.zip order by \"Number of orders\" desc",
+            "select orderid, orderdate, 'Not Shipped' as \"Ship Status\" from orders\n" +
+                    "where SHIPPEDDATE is null",
+            "select * from\n" +
+                    "(select orderid, totalprice from orders order by totalprice desc)\n" +
+                    "where rownum <= 5"
+    };
 }

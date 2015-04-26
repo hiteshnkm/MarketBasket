@@ -117,7 +117,6 @@ public class Connection {
         return results;
     }
 
-
     public OrderLineItem getOrderLineFromQuery(ResultSet orderResult) {
         try {
             long lineID = orderResult.getInt("LINEID");
