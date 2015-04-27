@@ -27,16 +27,17 @@ public class InventoryTable  extends AbstractTableModel {
 
     public InventoryTable(){
         ResultSet inventoryResults = Connection.getResultsFromQuery("select * from item");
-
-        try {
-            while (inventoryResults.next()) {
-                Item dbItem = Item.createItemFromQuery(inventoryResults);
-                if(dbItem != null) {
-                    itemList.add(dbItem);
+        if (inventoryResults != null) {
+            try {
+                while (inventoryResults.next()) {
+                    Item dbItem = Item.createItemFromQuery(inventoryResults);
+                    if (dbItem != null) {
+                        itemList.add(dbItem);
+                    }
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
