@@ -7,6 +7,7 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 /**
  * Created by Dr.H on 4/17/2015.
@@ -23,8 +24,12 @@ public class Order {
     private String shippingName;
     private Address shippingAddress;
     private Address BillingAddress;
+    private ArrayList<Payment> payments;
+    private double balanceRemaining;
 
-    public Order(long orderid, int customerid, Date orderDate, Date shipDate, double subTotal, double taxes, double totalPrice, String shippingName, Address shippingAddress, Address billingAddress) {
+    public Order(long orderid, int customerid, Date orderDate, Date shipDate, double subTotal, double taxes, double totalPrice,
+                 String shippingName, Address shippingAddress, Address billingAddress, ArrayList<Payment> payments,
+                 double balanceRemaining) {
         this.orderid = orderid;
         this.customerid = customerid;
         this.orderDate = orderDate;
@@ -36,6 +41,8 @@ public class Order {
         this.shippingName = shippingName;
         this.shippingAddress = shippingAddress;
         BillingAddress = billingAddress;
+        this.payments = payments;
+        this.balanceRemaining = balanceRemaining;
     }
 
     public static Order createNewOrder(Customer customer, double subTotal, double taxes, double totalPrice, Address shippingAddress, Address billingAddress){
@@ -89,9 +96,14 @@ public class Order {
             Address shippingAddress = Address.getAddressByID(shippingAddressID);
             int billingAddressID = orderResults.getInt("BILLINGADDRESS");
             Address billingAddress = Address.getAddressByID((billingAddressID));
+            ArrayList<Payment> payments = Payment.getPaymentsForOrder(orderid);
+            double balanceRemaining = totalPrice;
+            for (Payment payment : payments) {
+                balanceRemaining -= payment.getPaymentAmount();
+            }
 
             return new Order(orderid, customerid, orderDate, shipDate, subTotal,
-                    taxes, totalPrice, shippingName, shippingAddress, billingAddress);
+                    taxes, totalPrice, shippingName, shippingAddress, billingAddress, payments, balanceRemaining);
 
         } catch (SQLException ex){
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Error loading orders from database.", JOptionPane.ERROR_MESSAGE);
@@ -137,5 +149,13 @@ public class Order {
 
     public Date getShipDate() {
         return shipDate;
+    }
+
+    public ArrayList<Payment> getPayments() {
+        return payments;
+    }
+
+    public double getBalanceRemaining() {
+        return balanceRemaining;
     }
 }

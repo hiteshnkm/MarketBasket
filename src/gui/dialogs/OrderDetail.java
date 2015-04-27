@@ -50,7 +50,7 @@ public class OrderDetail extends JDialog {
         billingZip.setText(String.valueOf(billingAddress.getZip()));
         billingCountry.setText(billingAddress.getCountry());
 
-        ArrayList<Payment> payments = Payment.getPaymentsForOrder(order);
+        ArrayList<Payment> payments = order.getPayments();
         Object[][] paymentData = new Object[payments.size()][3];
 
         for (int i = 0; i < payments.size(); i++) {

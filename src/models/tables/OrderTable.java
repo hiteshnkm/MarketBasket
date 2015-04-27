@@ -1,5 +1,6 @@
 package models.tables;
 
+import gui.dialogs.MakePayment;
 import gui.dialogs.OrderDetail;
 import models.db.Customer;
 import models.db.Order;
@@ -90,7 +91,9 @@ public class OrderTable  extends AbstractTableModel {
                 final JButton make_payment = new JButton("Make payment");
                 make_payment.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
-                        JOptionPane.showMessageDialog(null, "Make payment");
+                        MakePayment makePayment = new MakePayment(rowOrder);
+                        makePayment.pack();
+                        makePayment.setVisible(true);
                     }
                 });
                 return make_payment;

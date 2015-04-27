@@ -1,5 +1,8 @@
 package gui.dialogs;
 
+import models.db.Order;
+import models.db.Payment;
+
 import javax.swing.*;
 import java.awt.event.*;
 
@@ -7,14 +10,31 @@ public class MakePayment extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
+    private JTextField paymentMethod;
+    private JTextField paymentAmount;
+    private JLabel balanceRemaining;
+    private JLabel balanceAfterPayment;
+    private double payAmt;
 
-    public MakePayment() {
+    public MakePayment(final Order order) {
+
+        balanceRemaining.setText(String.valueOf(order.getBalanceRemaining()));
+        balanceAfterPayment.setText(balanceRemaining.getText());
+
+        paymentAmount.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                payAmt = Double.valueOf(paymentAmount.getText());
+            }
+        });
+
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                Payment.createNewPayment(order, payAmt, order.getBalanceRemaining() - payAmt, paymentMethod.getText());
                 onOK();
             }
         });

@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -32,9 +33,9 @@ public class Payment {
         this.customerID = customerID;
     }
 
-    public static ArrayList<Payment> getPaymentsForOrder(Order order) {
+    public static ArrayList<Payment> getPaymentsForOrder(long orderid) {
         String sqlQuery = "select * from payment where orderid = ?";
-        ResultSet paymentResults = Connection.getResultsFromQuery(sqlQuery, String.valueOf(order.getOrderid()));
+        ResultSet paymentResults = Connection.getResultsFromQuery(sqlQuery, String.valueOf(orderid));
 
         ArrayList<Payment> paymentsForOrder = new ArrayList<Payment>();
         try {
@@ -57,6 +58,33 @@ public class Payment {
         }
 
         return paymentsForOrder;
+    }
+
+    public static void createNewPayment(Order order, double paymentAmount, double balance, String paymentMethod){
+        String sqlQuery = "insert into payment (paymentdate, paymentamount, balance, paymentmethod, customerid, orderid) " +
+                            "VALUES (TO_DATE(?, 'MM/DD/YYYY'), ?, ?, ?, ?, ?)";
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/YYYY");
+
+        java.sql.Date sqlDate = new java.sql.Date(new java.util.Date().getTime());
+
+        ResultSet createPaymentResult = Connection.getResultsFromQuery(
+                sqlQuery, // Sql query insert statement
+                dateFormat.format(sqlDate), // payment date
+                String.valueOf(paymentAmount), // payment amount
+                String.valueOf(balance), // balance on order
+                paymentMethod, // payment method type
+                String.valueOf(order.getCustomerid()), // customer id
+                String.valueOf(order.getOrderid()) // order id
+        );
+        try {
+            while (createPaymentResult.next()) {
+                JOptionPane.showMessageDialog(null, createPaymentResult.getString(0));
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error creating payment.", JOptionPane.ERROR_MESSAGE);
+        }
+
     }
 
     public long getPaymentID() {
