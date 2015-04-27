@@ -99,11 +99,7 @@ public class Connection {
         java.sql.Connection connection = getConnection();
         ResultSet results;
         try {
-            PreparedStatement statement = connection.prepareStatement(sqlQuery, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE, Statement.RETURN_GENERATED_KEYS);
-            ResultSet keys = statement.getGeneratedKeys();
-            while (keys.next()) {
-                JOptionPane.showMessageDialog(null, keys.getString(0));
-            }
+            PreparedStatement statement = connection.prepareStatement(sqlQuery, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             // Add all of the arguments to the sql query
             for (int i = 0; i < args.length; i++) {
                 int index = i + 1;

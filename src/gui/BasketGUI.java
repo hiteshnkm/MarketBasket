@@ -135,7 +135,7 @@ public class BasketGUI {
                 order.pack();
                 order.setLocationRelativeTo(JOptionPane.getFrameForComponent(placeOrder));
                 order.setVisible(true);
-                ((ReportTable) cartItemTable.getModel()).clearItems();
+                ((CartTable) cartItemTable.getModel()).clearItems();
                 cartItemTable.repaint();
             }
         });
