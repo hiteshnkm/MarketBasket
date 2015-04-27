@@ -111,8 +111,10 @@ public class BasketGUI {
                             orderTable.setRowHeight(35);
 
                             JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
-                            orderTable.getColumn("View Details").setCellRenderer(buttonRenderer);
-                            orderTable.getColumn("Make Payment").setCellRenderer(buttonRenderer);
+                            orderTable.getColumnModel().getColumn(3).setCellRenderer(buttonRenderer);
+                            orderTable.getColumnModel().getColumn(4).setCellRenderer(buttonRenderer);
+                            orderTable.addMouseListener(new JTableButtonMouseListener(orderTable));
+
                             return null;
                         }
 

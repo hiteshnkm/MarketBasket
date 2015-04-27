@@ -1,5 +1,6 @@
 package models.tables;
 
+import gui.dialogs.OrderDetail;
 import models.db.Customer;
 import models.db.Order;
 import utils.Connection;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
  */
 public class OrderTable  extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
-    private static final String[] COLUMN_NAMES = new String[] {"Order ID", "Order Date", "Total Price", "View Details", "Make Payment"};
+    private static final String[] COLUMN_NAMES = new String[] {"Order ID", "Order Date", "Total Price", "", ""};
     private static final Class<?>[] COLUMN_TYPES = new Class<?>[] {int.class, String.class, Long.class, JButton.class,  JButton.class};
     private static ArrayList<Order> orderList = new ArrayList<Order>();
     private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
@@ -76,15 +77,17 @@ public class OrderTable  extends AbstractTableModel {
             case 2:
                 return currencyFormat.format(rowOrder.getTotalPrice());
             case 3:
-                final JButton detail_button = new JButton(COLUMN_NAMES[columnIndex]);
+                final JButton detail_button = new JButton("Details");
                 detail_button.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
-                        JOptionPane.showMessageDialog(null, "Clicked view details.");
+                        OrderDetail orderDetail = new OrderDetail(rowOrder);
+                        orderDetail.pack();
+                        orderDetail.setVisible(true);
                     }
                 });
                 return detail_button;
             case 4:
-                final JButton make_payment = new JButton(COLUMN_NAMES[columnIndex]);
+                final JButton make_payment = new JButton("Make payment");
                 make_payment.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
                         JOptionPane.showMessageDialog(null, "Make payment");

@@ -16,6 +16,7 @@ public class Order {
     private long orderid;
     private int customerid;
     private Date orderDate;
+    private Date shipDate;
     private double subTotal;
     private double taxes;
     private double totalPrice;
@@ -23,10 +24,12 @@ public class Order {
     private Address shippingAddress;
     private Address BillingAddress;
 
-    public Order(long orderid, int customerid, Date orderDate, double subTotal, double taxes, double totalPrice, String shippingName, Address shippingAddress, Address billingAddress) {
+    public Order(long orderid, int customerid, Date orderDate, Date shipDate, double subTotal, double taxes, double totalPrice, String shippingName, Address shippingAddress, Address billingAddress) {
         this.orderid = orderid;
         this.customerid = customerid;
         this.orderDate = orderDate;
+        this.shipDate = shipDate;
+        this.shipDate = shipDate;
         this.subTotal = subTotal;
         this.taxes = taxes;
         this.totalPrice = totalPrice;
@@ -77,6 +80,7 @@ public class Order {
             long orderid = orderResults.getLong("ORDERID");
             int customerid = orderResults.getInt("CUSTOMERID");
             Date orderDate = orderResults.getDate("ORDERDATE");
+            Date shipDate = orderResults.getDate("SHIPPEDDATE");
             double subTotal = orderResults.getDouble("SUBTOTAL");
             double taxes = orderResults.getDouble("TAXES");
             double totalPrice = orderResults.getDouble("TOTALPRICE");
@@ -86,7 +90,7 @@ public class Order {
             int billingAddressID = orderResults.getInt("BILLINGADDRESS");
             Address billingAddress = Address.getAddressByID((billingAddressID));
 
-            return new Order(orderid, customerid, orderDate, subTotal,
+            return new Order(orderid, customerid, orderDate, shipDate, subTotal,
                     taxes, totalPrice, shippingName, shippingAddress, billingAddress);
 
         } catch (SQLException ex){
@@ -129,5 +133,9 @@ public class Order {
 
     public Address getBillingAddress() {
         return BillingAddress;
+    }
+
+    public Date getShipDate() {
+        return shipDate;
     }
 }
