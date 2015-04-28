@@ -6,9 +6,9 @@
       <xy x="48" y="54" width="436" height="675"/>
     </constraints>
     <properties>
-      <minimumSize width="420" height="491"/>
+      <minimumSize width="-1" height="-1"/>
       <opaque value="true"/>
-      <preferredSize width="420" height="675"/>
+      <preferredSize width="500" height="500"/>
     </properties>
     <border type="none"/>
     <children>
@@ -150,7 +150,7 @@
       <grid id="e23f6" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="5" left="5" bottom="5" right="5"/>
         <constraints>
-          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none" title="Shipping Address"/>
@@ -254,7 +254,7 @@
       <grid id="2f4cb" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="5" left="5" bottom="5" right="5"/>
         <constraints>
-          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none" title="Billing Address"/>

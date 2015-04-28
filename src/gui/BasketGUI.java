@@ -151,7 +151,7 @@ public class BasketGUI {
         });
     }
 
-    private void updateInventoryTable() {
+    private SwingWorker<Void, Void> updateInventoryTable() {
 
         TableModel tableModel = itemTable.getModel();
 
@@ -188,6 +188,7 @@ public class BasketGUI {
             }
         };
         worker.execute();
+        return worker;
 
     }
 
@@ -386,8 +387,12 @@ public class BasketGUI {
         JFrame frame = new JFrame("BasketGUI");
         frame.setContentPane(gui.panel1);
 
-        gui.updateInventoryTable();
+        SwingWorker<Void, Void> invUpdateWorker = gui.updateInventoryTable();
 
+        // quick hack to prevent main gui from displaying before inventory update is finished.
+        while (!invUpdateWorker.isDone()) {
+
+        }
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(625, 540));
         frame.pack();
