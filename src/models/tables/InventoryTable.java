@@ -92,4 +92,8 @@ public class InventoryTable  extends AbstractTableModel {
                 return "Error";
         }
     }
+
+    public void clearRows(){
+        itemList.clear();
+    }
 }

@@ -130,6 +130,65 @@ public class BasketGUI {
                 refreshWorker.execute();
             }
         });
+
+        invRefreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingWorker<Void, Void> refreshWorker = new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        Connection.refreshConnection();
+                        return null;
+                    }
+
+                    @Override
+                    public void done(){
+                        updateInventoryTable();
+                    }
+                };
+                refreshWorker.execute();
+            }
+        });
+    }
+
+    private void updateInventoryTable() {
+
+        TableModel tableModel = itemTable.getModel();
+
+        final JFrame orderLoading = Connection.createLoadingFrame("Loading inventory...");
+        if (tableModel instanceof InventoryTable) {
+            ((InventoryTable) tableModel).clearRows();
+            tabPane.repaint();
+        }
+
+        // Swing worker that will pull the inventory information.
+        // Will display a loading message while it runs in the background
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            @Override
+            public Void doInBackground() {
+                InventoryTable inventoryModel = new InventoryTable();
+                itemTable.setModel(inventoryModel);
+
+                itemTable.setIntercellSpacing(new Dimension(5, 5));
+                itemTable.setRowHeight(35);
+
+                JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
+
+                itemTable.getColumnModel().getColumn(2).setCellRenderer(buttonRenderer);
+                itemTable.getColumnModel().getColumn(3).setCellRenderer(buttonRenderer);
+                itemTable.removeMouseListener(itemTableMouseListener);
+                itemTable.addMouseListener(itemTableMouseListener);
+
+                return null;
+            }
+
+            @Override
+            public void done() {
+                orderLoading.dispose();
+            }
+        };
+        worker.execute();
+
     }
 
     private void updateOrderTable(){
@@ -327,17 +386,7 @@ public class BasketGUI {
         JFrame frame = new JFrame("BasketGUI");
         frame.setContentPane(gui.panel1);
 
-        InventoryTable inventoryModel = new InventoryTable();
-        gui.itemTable.setModel(inventoryModel);
-
-        gui.itemTable.setIntercellSpacing(new Dimension(5, 5));
-        gui.itemTable.setRowHeight(35);
-
-        JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
-
-        gui.itemTable.getColumnModel().getColumn(2).setCellRenderer(buttonRenderer);
-        gui.itemTable.getColumnModel().getColumn(3).setCellRenderer(buttonRenderer);
-        gui.itemTable.addMouseListener(new JTableButtonMouseListener(gui.itemTable));
+        gui.updateInventoryTable();
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(625, 540));
@@ -407,10 +456,12 @@ public class BasketGUI {
     private JButton customerReportBtn;
     private JButton paymentReportBtn;
     private JButton refreshButton;
+    private JButton invRefreshButton;
     private HomeScreen homeScreen;
 
     // Other variables
     private final JTableButtonMouseListener orderTableMouseListener =  new JTableButtonMouseListener(orderTable);
+    private final JTableButtonMouseListener itemTableMouseListener =  new JTableButtonMouseListener(itemTable);
 
     private static final String[] itemReports = {"Average item price.", "Get most expensive and least expensive item."};
     private static final String[] itemQueries = {"Select avg(Price) as AveragePrices from Item", "SELECT * FROM ITEM ORDER BY PRICE DESC"};
