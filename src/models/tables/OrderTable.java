@@ -21,8 +21,8 @@ import java.util.ArrayList;
  */
 public class OrderTable  extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
-    private static final String[] COLUMN_NAMES = new String[] {"Order ID", "Order Date", "Total Price", "", ""};
-    private static final Class<?>[] COLUMN_TYPES = new Class<?>[] {int.class, String.class, Long.class, JButton.class,  JButton.class};
+    private static final String[] COLUMN_NAMES = new String[] {"ID", "Order Date", "Total Price", "Balance", "", ""};
+    private static final Class<?>[] COLUMN_TYPES = new Class<?>[] {int.class, String.class, Long.class, double.class, JButton.class,  JButton.class};
     private static ArrayList<Order> orderList = new ArrayList<Order>();
     private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
     private int customerID;
@@ -78,6 +78,8 @@ public class OrderTable  extends AbstractTableModel {
             case 2:
                 return currencyFormat.format(rowOrder.getTotalPrice());
             case 3:
+                return currencyFormat.format(rowOrder.getBalanceRemaining());
+            case 4:
                 final JButton detail_button = new JButton("Details");
                 detail_button.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
@@ -87,7 +89,7 @@ public class OrderTable  extends AbstractTableModel {
                     }
                 });
                 return detail_button;
-            case 4:
+            case 5:
                 final JButton make_payment = new JButton("Make payment");
                 make_payment.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
@@ -96,9 +98,21 @@ public class OrderTable  extends AbstractTableModel {
                         makePayment.setVisible(true);
                     }
                 });
+                // Disable the payment button on orders that have been paid off.
+                if (rowOrder.getBalanceRemaining() == 0.0) {
+                    make_payment.setEnabled(false);
+                }
                 return make_payment;
             default:
                 return "Error";
         }
+    }
+
+    public int getCustomerID(){
+        return this.customerID;
+    }
+
+    public void clearRows(){
+        orderList.clear();
     }
 }

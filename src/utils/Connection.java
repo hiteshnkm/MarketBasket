@@ -20,8 +20,16 @@ public class Connection {
     private static Customer loggedInCustomer;
 
     static class ConnectionHolder{
-
         private static java.sql.Connection CONN = createConnection();
+
+        public static void refreshConnection() {
+            try {
+                CONN.close();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, ex.getMessage(), "Error refreshing connection.", JOptionPane.ERROR_MESSAGE);
+            }
+            CONN = createConnection();
+        }
     }
 
     /**
@@ -95,7 +103,8 @@ public class Connection {
      * @param args pass any number of string arguments that need to be inserted into the sql query
      * @return ResultSet object which can be used to pull the results of the query.
      */
-    public static ResultSet getResultsFromQuery(String sqlQuery, String... args){
+    public static ResultSet getResultsFromQuery(String sqlQuery, String... args) {
+        System.out.println("Query: " + sqlQuery);
         java.sql.Connection connection = getConnection();
         ResultSet results;
         try {
@@ -106,7 +115,7 @@ public class Connection {
                 statement.setString(index, args[i]);
             }
             results = statement.executeQuery();
-        }catch(SQLException ex){
+        } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
             results = null;
         }
@@ -142,6 +151,10 @@ public class Connection {
      */
     public static void setLoggedInCustomer(Customer loggedInCustomer) {
         Connection.loggedInCustomer = loggedInCustomer;
+    }
+
+    public static void refreshConnection(){
+        ConnectionHolder.refreshConnection();
     }
 
 }

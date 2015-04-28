@@ -2,8 +2,11 @@ package gui.dialogs;
 
 import models.db.Order;
 import models.db.Payment;
+import utils.Connection;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.event.*;
 
 public class MakePayment extends JDialog {
@@ -21,9 +24,28 @@ public class MakePayment extends JDialog {
         balanceRemaining.setText(String.valueOf(order.getBalanceRemaining()));
         balanceAfterPayment.setText(balanceRemaining.getText());
 
-        paymentAmount.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
+        paymentAmount.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+                updateAmount();
+            }
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+                updateAmount();
+            }
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+                updateAmount();
+            }
+
+            public void warn() {
+                if (Double.parseDouble(paymentAmount.getText())<=0){
+                    JOptionPane.showMessageDialog(null,
+                            "Error: Please enter number bigger than 0", "Error Massage",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            public void updateAmount(){
                 payAmt = Double.valueOf(paymentAmount.getText());
             }
         });
@@ -35,6 +57,7 @@ public class MakePayment extends JDialog {
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Payment.createNewPayment(order, payAmt, order.getBalanceRemaining() - payAmt, paymentMethod.getText());
+                Connection.refreshConnection();
                 onOK();
             }
         });

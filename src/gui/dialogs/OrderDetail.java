@@ -13,7 +13,6 @@ public class OrderDetail extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonClose;
-    private JScrollBar scrollBar1;
     private JTable paymentsTable;
     private JLabel orderID;
     private JLabel orderDate;
@@ -61,12 +60,16 @@ public class OrderDetail extends JDialog {
                 switch (j) {
                     case 0:
                         paymentInfo = currentPayment.getPaymentID();
+                        break;
                     case 1:
                         paymentInfo = currentPayment.getPaymentDate();
+                        break;
                     case 2:
                         paymentInfo = currentPayment.getPaymentAmount();
+                        break;
                     default:
                         paymentInfo = "";
+                        break;
                 }
                 paymentRow[j] = paymentInfo;
             }

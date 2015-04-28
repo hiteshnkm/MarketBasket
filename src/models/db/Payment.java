@@ -77,14 +77,6 @@ public class Payment {
                 String.valueOf(order.getCustomerid()), // customer id
                 String.valueOf(order.getOrderid()) // order id
         );
-        try {
-            while (createPaymentResult.next()) {
-                JOptionPane.showMessageDialog(null, createPaymentResult.getString(0));
-            }
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error creating payment.", JOptionPane.ERROR_MESSAGE);
-        }
-
     }
 
     public long getPaymentID() {

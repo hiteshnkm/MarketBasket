@@ -19,6 +19,7 @@ public class Address {
     private int zip;
     private String country;
     private String state;
+    private static ArrayList<Address> storedAddresses = new ArrayList<Address>();
 
     public Address(long addressid, String addressLine, String city, int zip, String country, String state) {
         this.addressid = addressid;
@@ -70,17 +71,22 @@ public class Address {
     }
 
     public static Address getAddressByID(int addressID) {
-        String addressQuery = "Select * from address where addressid = ?";
-        ResultSet addressResults = Connection.getResultsFromQuery(addressQuery, String.valueOf(addressID));
-        try {
-            while (addressResults.next()) {
-                return createAddressFromResult(addressResults);
+        Address storedAddress = getStoredAddress(addressID);
+        if (storedAddress == null) {
+            String addressQuery = "Select * from address where addressid = ?";
+            ResultSet addressResults = Connection.getResultsFromQuery(addressQuery, String.valueOf(addressID));
+            try {
+                while (addressResults.next()) {
+                    Address createdAddress = createAddressFromResult(addressResults);
+                    storeNewAddress(createdAddress);
+                    return createdAddress;
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, ex.getMessage(), "Error loading Address from database.", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, ex.getMessage(), "Error loading Address from database.", JOptionPane.ERROR_MESSAGE);
         }
 
-        return null;
+        return storedAddress;
     }
 
     public static List<Address> getAddressesForCustomer(int customerID, boolean getBilling) {
@@ -104,5 +110,18 @@ public class Address {
         }
 
         return addressList;
+    }
+
+    private static Address getStoredAddress(int addressid) {
+        for (Address address : storedAddresses) {
+            if(address.getAddressid() == addressid){
+                return address;
+            }
+        }
+        return null;
+    }
+
+    private static void storeNewAddress(Address address) {
+        storedAddresses.add(address);
     }
 }

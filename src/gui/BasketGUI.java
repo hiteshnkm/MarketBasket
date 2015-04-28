@@ -12,8 +12,7 @@ import utils.Connection;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableModel;
+import javax.swing.table.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -52,15 +51,15 @@ public class BasketGUI {
             public void actionPerformed(ActionEvent actionEvent) {
                 final JFrame loginMessage = Connection.createLoadingFrame("Authenticating user...");
                 // Run the login process in the background and display a notification when the process finishes
-                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>(){
+                SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
                     @Override
-                    public Void doInBackground(){
+                    public Void doInBackground() {
                         login(usernameField.getText(), loginPasswordField.getPassword());
                         return null;
                     }
 
                     @Override
-                    public void done(){
+                    public void done() {
                         loginMessage.dispose();
                     }
                 };
@@ -79,52 +78,23 @@ public class BasketGUI {
                     cartItemTable.getColumn("Remove").setCellRenderer(new JTableButtonRenderer());
 
                     // If there are no items in the cart then we want to disable the place order button
-                    if(cartTable.getCartItems().size() < 1){
+                    if (cartTable.getCartItems().size() < 1) {
                         placeOrder.setEnabled(false);
                     }
                     // Should be enabled for items in the cart
-                    else{
+                    else {
                         placeOrder.setEnabled(true);
                     }
+                } else if (tabPane.getSelectedIndex() == 3) {
+                    TableModel tableModel = orderTable.getModel();
+
+                    // If the table model is an not an instance of OrderTable or the customer that loaded the order table
+                    // is not the current logged in user then we only need to reload the date.
+                    if (!(tableModel instanceof OrderTable) || Connection.getLoggedInCustomer().getCustomerID() != ((OrderTable) tableModel).getCustomerID()) {
+                        updateOrderTable();
+                    }
                 }
-                else if (tabPane.getSelectedIndex() == 3) {
 
-                    final JFrame orderLoading = Connection.createLoadingFrame("Loading order history");
-
-                    // Swing worker that will pull the order information for the logged in customer
-                    // will display a loading message while it runs in the background
-                    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>(){
-                        @Override
-                        public Void doInBackground(){
-                            TableModel tableModel = orderTable.getModel();
-
-                            // If the table model is an instance of OrderTable then
-                            // we only need to get the latest orders and not all of them.
-                            if (tableModel instanceof OrderTable) {
-                                ((OrderTable) tableModel).updateOrders();
-                                return null;
-                            }
-
-                            OrderTable orderModel = new OrderTable(Connection.getLoggedInCustomer());
-                            orderTable.setModel(orderModel);
-                            orderTable.setIntercellSpacing(new Dimension(5, 5));
-                            orderTable.setRowHeight(35);
-
-                            JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
-                            orderTable.getColumnModel().getColumn(3).setCellRenderer(buttonRenderer);
-                            orderTable.getColumnModel().getColumn(4).setCellRenderer(buttonRenderer);
-                            orderTable.addMouseListener(new JTableButtonMouseListener(orderTable));
-
-                            return null;
-                        }
-
-                        @Override
-                        public void done(){
-                            orderLoading.dispose();
-                        }
-                    };
-                    worker.execute();
-                }
                 tabPane.getRootPane().repaint();
             }
         });
@@ -141,6 +111,86 @@ public class BasketGUI {
                 cartItemTable.repaint();
             }
         });
+
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                SwingWorker<Void, Void> refreshWorker = new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        Connection.refreshConnection();
+                        return null;
+                    }
+
+                    @Override
+                    public void done(){
+                        updateOrderTable();
+                    }
+                };
+                refreshWorker.execute();
+            }
+        });
+    }
+
+    private void updateOrderTable(){
+        TableModel tableModel = orderTable.getModel();
+
+        final JFrame orderLoading = Connection.createLoadingFrame("Loading order history");
+        if (tableModel instanceof OrderTable) {
+            ((OrderTable) tableModel).clearRows();
+            tabPane.repaint();
+        }
+
+        // Swing worker that will pull the order information for the logged in customer
+        // will display a loading message while it runs in the background
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            @Override
+            public Void doInBackground() {
+                OrderTable orderModel = new OrderTable(Connection.getLoggedInCustomer());
+                orderTable.setModel(orderModel);
+                orderTable.setIntercellSpacing(new Dimension(5, 5));
+                orderTable.setRowHeight(35);
+
+                TableColumnModel orderColumnModel = orderTable.getColumnModel();
+
+                TableColumn firstColumn = orderColumnModel.getColumn(0);
+                firstColumn.setMinWidth(20);
+
+                TableColumn secondColumn = orderColumnModel.getColumn(1);
+                secondColumn.setMinWidth(80);
+
+                TableColumn thirdColumn = orderColumnModel.getColumn(2);
+                thirdColumn.setMinWidth(55);
+
+                TableColumn fourthColumn = orderColumnModel.getColumn(3);
+                DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
+                rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+                fourthColumn.setCellRenderer(rightRenderer);
+                fourthColumn.setMinWidth(55);
+                fourthColumn.setPreferredWidth(80);
+
+                TableColumn fifthColumn = orderColumnModel.getColumn(4);
+                JTableButtonRenderer buttonRenderer = new JTableButtonRenderer();
+                fifthColumn.setCellRenderer(buttonRenderer);
+                fifthColumn.setMinWidth(100);
+//                fifthColumn.setMaxWidth(100);
+
+                TableColumn sixthColumn = orderColumnModel.getColumn(5);
+                sixthColumn.setCellRenderer(buttonRenderer);
+                sixthColumn.setMinWidth(150);
+
+                orderTable.removeMouseListener(orderTableMouseListener);
+                orderTable.addMouseListener(orderTableMouseListener);
+
+                return null;
+            }
+
+            @Override
+            public void done() {
+                orderLoading.dispose();
+            }
+        };
+        worker.execute();
     }
 
     private class ReportButtonEvent implements ActionListener{
@@ -356,9 +406,12 @@ public class BasketGUI {
     private JButton orderReportBtn;
     private JButton customerReportBtn;
     private JButton paymentReportBtn;
+    private JButton refreshButton;
     private HomeScreen homeScreen;
 
     // Other variables
+    private final JTableButtonMouseListener orderTableMouseListener =  new JTableButtonMouseListener(orderTable);
+
     private static final String[] itemReports = {"Average item price.", "Get most expensive and least expensive item."};
     private static final String[] itemQueries = {"Select avg(Price) as AveragePrices from Item", "SELECT * FROM ITEM ORDER BY PRICE DESC"};
 
