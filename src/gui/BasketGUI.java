@@ -35,12 +35,17 @@ public class BasketGUI {
         DefaultComboBoxModel itemReportModel = new DefaultComboBoxModel<String>(itemReports);
         itemReportOptions.setModel(itemReportModel);
 
-        itemReportBtn.addActionListener(new ReportButtonEvent(itemReportOptions, itemReports, itemQueries));
+        itemReportBtn.addActionListener(new ReportButtonEvent(itemReportOptions, itemReports, itemQueries, null));
 
         DefaultComboBoxModel<String> orderReportModel = new DefaultComboBoxModel<String>(orderReports);
         orderReportOptions.setModel(orderReportModel);
 
-        orderReportBtn.addActionListener(new ReportButtonEvent(orderReportOptions, orderReports, orderQueries));
+        orderReportBtn.addActionListener(new ReportButtonEvent(orderReportOptions, orderReports, orderQueries, null));
+
+        DefaultComboBoxModel<String> paymentReportModel = new DefaultComboBoxModel<String>(paymentReports);
+        paymentReportOptions.setModel(paymentReportModel);
+
+        paymentReportBtn.addActionListener(new ReportButtonEvent(paymentReportOptions, paymentReports, paymentQueries, paymentCustomerParams));
 
         // Disable the cart and orders tab initially, since a user will not be logged in
         tabPane.setEnabledAt(2, false);
@@ -258,11 +263,13 @@ public class BasketGUI {
         private JComboBox dropDownBox;
         private String[] reports;
         private String[] queries;
+        private boolean[] needLoggedInCustomer;
 
-        public ReportButtonEvent(JComboBox dropDownBox, String[] reports, String[] queries){
+        public ReportButtonEvent(JComboBox dropDownBox, String[] reports, String[] queries, boolean[] needLoggedInCustomer){
             this.dropDownBox = dropDownBox;
             this.reports = reports;
             this.queries = queries;
+            this.needLoggedInCustomer = needLoggedInCustomer;
         }
 
         @Override
@@ -277,7 +284,7 @@ public class BasketGUI {
                     int selectedReportIndex = dropDownBox.getSelectedIndex();
                     try{
                         // Create the report
-                        generateReport(generatingReportMessage, reports, queries, selectedReportIndex);
+                        generateReport(generatingReportMessage, reports, queries, needLoggedInCustomer, selectedReportIndex);
                     } catch (SQLException ex) {
                         JOptionPane.showMessageDialog(null, ex.getMessage(), "Error generating report", JOptionPane.ERROR_MESSAGE);
                     }
@@ -286,6 +293,11 @@ public class BasketGUI {
             };
             reportWorker.execute();
         }
+    }
+
+    private static void generateReport(JFrame generatingReportMessage, String[] reportList, String[] queryList,
+                                        int selectedReportIndex) throws SQLException {
+        generateReport(generatingReportMessage, reportList, queryList, null, selectedReportIndex);
     }
 
     /**
@@ -301,11 +313,18 @@ public class BasketGUI {
      * @param selectedReportIndex the index of the report that was selected
      * @throws SQLException
      */
-    private static void generateReport(JFrame generatingReportMessage, String[] reportList, String[] queryList, int selectedReportIndex) throws SQLException{
+    private static void generateReport(JFrame generatingReportMessage, String[] reportList, String[] queryList, boolean[] needLoggedInCustomer, int selectedReportIndex) throws SQLException{
         String selectedReport = reportList[selectedReportIndex];
         String selectedReportQuery = queryList[selectedReportIndex];
 
-        ResultSet queryResult = Connection.getResultsFromQuery(selectedReportQuery);
+        ResultSet queryResult;
+
+        if(needLoggedInCustomer != null && needLoggedInCustomer[selectedReportIndex]) {
+            queryResult = Connection.getResultsFromQuery(selectedReportQuery, String.valueOf(Connection.getLoggedInCustomer().getCustomerID()));
+        }
+        else{
+            queryResult = Connection.getResultsFromQuery(selectedReportQuery);
+        }
 
         ArrayList<String[]> result = new ArrayList<String[]>();
         ResultSetMetaData resultData = queryResult.getMetaData();
@@ -503,5 +522,116 @@ public class BasketGUI {
             "select * from\n" +
                     "(select orderid, totalprice from orders order by totalprice desc)\n" +
                     "where rownum <= 5"
+    };
+
+    private static final String[] paymentReports = {
+            "Sum of payments for current customer",
+            "Method of payment for current customer",
+            "Number of payments for customer",
+            "What payments have been processed? (completed)",
+            "Pending payments",
+            "All payments for current customer",
+            "Customer with most payments",
+            "Customer with highest payment",
+            "Most used method of payment",
+            "Dates payments were made"
+    };
+
+    private static final String[] paymentQueries = {
+            "SELECT DISTINCT (FIRSTNAME ||' '|| MIDDLEINIT|| ' '|| LASTNAME) AS FULL_NAME, \n" +
+                    "\n" +
+                    "PAYMENT.CUSTOMERID, SUM(PAYMENTAMOUNT) AS TOTAL_AMOUNT\n" +
+                    "\n" +
+                    "FROM PAYMENT JOIN CUSTOMERS ON PAYMENT.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
+                    "\n" +
+                    "WHERE PAYMENT.CUSTOMERID = ?\n" +
+                    "\n" +
+                    "GROUP BY PAYMENT.CUSTOMERID, (FIRSTNAME ||' '|| MIDDLEINIT|| ' '|| LASTNAME)",
+            "SELECT DISTINCT PAYMENT.CUSTOMERID, (FIRSTNAME ||' '|| MIDDLEINIT|| ' '|| LASTNAME)\n" +
+                    "\n" +
+                    "AS FULL_NAME, PAYMENT.PAYMENTMETHOD\n" +
+                    "\n" +
+                    "FROM PAYMENT JOIN CUSTOMERS ON PAYMENT.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
+                    "\n" +
+                    "WHERE PAYMENT.CUSTOMERID = ?\n" +
+                    "\n" +
+                    "GROUP BY PAYMENT.CUSTOMERID, (FIRSTNAME||' '|| MIDDLEINIT|| ' '|| \n" +
+                    "\n" +
+                    "LASTNAME),PAYMENT.PAYMENTMETHOD",
+            "SELECT DISTINCT PAYMENT.CUSTOMERID, (FIRSTNAME ||' '|| MIDDLEINIT|| ' '|| LASTNAME) \n" +
+                    "\n" +
+                    "AS FULL_NAME, COUNT(PAYMENTID)AS NUMBER_OF_PAYMENTS_MADE\n" +
+                    "\n" +
+                    "FROM PAYMENT JOIN CUSTOMERS ON PAYMENT.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
+                    "\n" +
+                    "WHERE PAYMENT.CUSTOMERID = ?\n" +
+                    "\n" +
+                    "GROUP BY PAYMENT.CUSTOMERID,(FIRSTNAME||' '|| MIDDLEINIT|| ' '|| LASTNAME)",
+            "SELECT DISTINCT PAYMENT.CUSTOMERID, (FIRSTNAME ||' '|| MIDDLEINIT|| ' '|| LASTNAME)\n" +
+                    "\n" +
+                    "AS FULL_NAME, PAYMENTID, ITEM.ITEMNAME, PAYMENTAMOUNT, PAYMENTDATE AS \n" +
+                    "\n" +
+                    "DATE_PAYMENT_PROCESSED\n" +
+                    "\n" +
+                    "FROM PAYMENT JOIN CUSTOMERS ON PAYMENT.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
+                    "\n" +
+                    "JOIN ORDERS ON ORDERS.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
+                    "\n" +
+                    "JOIN ORDER_LINE_ITEM ON ORDER_LINE_ITEM.ORDERID = ORDERS.ORDERID\n" +
+                    "\n" +
+                    "JOIN ITEM ON ORDER_LINE_ITEM.ITEMID = ITEM.ITEMID\n" +
+                    "\n" +
+                    "WHERE PAYMENTAMOUNT > 0 \n" +
+                    "\n" +
+                    "GROUP BY PAYMENT.CUSTOMERID, (FIRSTNAME||' '|| MIDDLEINIT|| ' '|| LASTNAME), \n" +
+                    "\n" +
+                    "PAYMENTID, PAYMENTDATE, PAYMENTAMOUNT, ITEM.ITEMNAME\n" +
+                    "\n" +
+                    "ORDER BY FULL_NAME",
+            "SELECT DISTINCT PAYMENT.CUSTOMERID, (FIRSTNAME ||' '|| MIDDLEINIT|| ' '||\n" +
+                    "\n" +
+                    "LASTNAME) AS FULL_NAME, PAYMENTID, BALANCE\n" +
+                    "\n" +
+                    "FROM PAYMENT JOIN CUSTOMERS ON PAYMENT.CUSTOMERID = \n" +
+                    "\n" +
+                    "CUSTOMERS.CUSTOMERID\n" +
+                    "\n" +
+                    "JOIN ORDERS ON ORDERS.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
+                    "\n" +
+                    "JOIN ORDER_LINE_ITEM ON ORDER_LINE_ITEM.ORDERID = ORDERS.ORDERID\n" +
+                    "\n" +
+                    "JOIN ITEM ON ORDER_LINE_ITEM.ITEMID = ITEM.ITEMID\n" +
+                    "\n" +
+                    "WHERE BALANCE != 0 \n" +
+                    "\n" +
+                    "GROUP BY PAYMENT.CUSTOMERID, (FIRSTNAME||' '|| MIDDLEINIT|| ' '|| LASTNAME), \n" +
+                    "\n" +
+                    "BALANCE, PAYMENTID\n" +
+                    "\n" +
+                    "ORDER BY PAYMENTID",
+            "", // 6 - query that displays all payments from an individual customer (not total)
+            "SELECT DISTINCT PAYMENT.CUSTOMERID, (FIRSTNAME ||' '|| MIDDLEINIT|| ' '|| LASTNAME)\n" +
+                    "\n" +
+                    "AS FULL_NAME, COUNT(PAYMENTID) AS NUMBER_OF_PAYMENTS_MADE\n" +
+                    "\n" +
+                    "FROM PAYMENT JOIN CUSTOMERS ON PAYMENT.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
+                    "\n" +
+                    "GROUP BY PAYMENT.CUSTOMERID, (FIRSTNAME ||' '|| MIDDLEINIT|| ' '|| LASTNAME)",
+            "", // 8 - highest payment
+            "", // 9 - most used method of payment
+            "" // 10 - what dates payments are made
+    };
+
+    private static final boolean[] paymentCustomerParams = {
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
     };
 }
