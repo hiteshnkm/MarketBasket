@@ -8,6 +8,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.event.*;
+import java.text.NumberFormat;
 
 public class MakePayment extends JDialog {
     private JPanel contentPane;
@@ -18,10 +19,12 @@ public class MakePayment extends JDialog {
     private JLabel balanceRemaining;
     private JLabel balanceAfterPayment;
     private double payAmt;
+    private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+
 
     public MakePayment(final Order order) {
 
-        balanceRemaining.setText(String.valueOf(order.getBalanceRemaining()));
+        balanceRemaining.setText(currencyFormat.format(order.getBalanceRemaining()));
         balanceAfterPayment.setText(balanceRemaining.getText());
 
         paymentAmount.getDocument().addDocumentListener(new DocumentListener() {
@@ -39,14 +42,22 @@ public class MakePayment extends JDialog {
             }
 
             public void warn() {
-                if (Double.parseDouble(paymentAmount.getText())<=0){
-                    JOptionPane.showMessageDialog(null,
-                            "Error: Please enter number bigger than 0", "Error Massage",
-                            JOptionPane.ERROR_MESSAGE);
+                if(!paymentAmount.getText().equals("")) {
+                    if (Double.parseDouble(paymentAmount.getText()) <= 0) {
+                        JOptionPane.showMessageDialog(null,
+                                "Error: Please enter number bigger than 0", "Error Massage",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
-            public void updateAmount(){
-                payAmt = Double.valueOf(paymentAmount.getText());
+            public void updateAmount() {
+                if (paymentAmount.getText().equals("")) {
+                    payAmt = 0;
+                }else {
+                    payAmt = Double.valueOf(paymentAmount.getText());
+                }
+                double newBalance = order.getBalanceRemaining() - payAmt;
+                balanceAfterPayment.setText(currencyFormat.format(newBalance));
             }
         });
 
@@ -56,8 +67,13 @@ public class MakePayment extends JDialog {
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                if (payAmt <= 0) {
+                    JOptionPane.showMessageDialog(null,
+                            "Please enter payment amount bigger than 0.", "Error Making Payment",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 Payment.createNewPayment(order, payAmt, order.getBalanceRemaining() - payAmt, paymentMethod.getText());
-                Connection.refreshConnection();
                 onOK();
             }
         });

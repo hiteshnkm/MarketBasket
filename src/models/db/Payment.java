@@ -22,6 +22,7 @@ public class Payment {
     private String paymentMethod;
     private long customerID;
     private long orderID;
+    private static ArrayList<Payment> allPayments = new ArrayList<Payment>();
 
     public Payment(long orderID, long paymentID, Date paymentDate, double paymentAmount, double balance, String paymentMethod, long customerID) {
         this.orderID = orderID;
@@ -34,10 +35,20 @@ public class Payment {
     }
 
     public static ArrayList<Payment> getPaymentsForOrder(long orderid) {
-        String sqlQuery = "select * from payment where orderid = ?";
-        ResultSet paymentResults = Connection.getResultsFromQuery(sqlQuery, String.valueOf(orderid));
-
         ArrayList<Payment> paymentsForOrder = new ArrayList<Payment>();
+        for (Payment payment : allPayments) {
+            if (payment.getOrderID() == orderid) {
+                paymentsForOrder.add(payment);
+            }
+        }
+        return paymentsForOrder;
+    }
+
+    public static void getAllPayments(){
+        allPayments.clear();
+        String sqlQuery = "select * from payment";
+        ResultSet paymentResults = Connection.getResultsFromQuery(sqlQuery);
+
         try {
             while (paymentResults.next()) {
                 long paymentID = paymentResults.getLong("paymentid");
@@ -50,14 +61,12 @@ public class Payment {
 
                 Payment payment = new Payment(orderID, paymentID, paymentDate,
                         paymentAmount, balance, paymentMethod, customerID);
-                paymentsForOrder.add(payment);
+                allPayments.add(payment);
             }
         }
         catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage(), "Error loading payments.", JOptionPane.ERROR_MESSAGE);
         }
-
-        return paymentsForOrder;
     }
 
     public static void createNewPayment(Order order, double paymentAmount, double balance, String paymentMethod){

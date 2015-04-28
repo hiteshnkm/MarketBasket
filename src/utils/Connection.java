@@ -104,7 +104,6 @@ public class Connection {
      * @return ResultSet object which can be used to pull the results of the query.
      */
     public static ResultSet getResultsFromQuery(String sqlQuery, String... args) {
-        System.out.println("Query: " + sqlQuery);
         java.sql.Connection connection = getConnection();
         ResultSet results;
         try {

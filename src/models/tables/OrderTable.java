@@ -4,6 +4,7 @@ import gui.dialogs.MakePayment;
 import gui.dialogs.OrderDetail;
 import models.db.Customer;
 import models.db.Order;
+import models.db.Payment;
 import utils.Connection;
 
 import javax.swing.*;
@@ -28,6 +29,8 @@ public class OrderTable  extends AbstractTableModel {
     private int customerID;
 
     public OrderTable(Customer customer) {
+        // Load all the payments
+        Payment.getAllPayments();
         customerID = customer.getCustomerID();
         ResultSet orderResults = Connection.getResultsFromQuery("select * from orders where customerid = ?", String.valueOf(customerID));
         addOrdersToList(orderResults);
