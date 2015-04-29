@@ -87,6 +87,10 @@ public class InventoryTable  extends AbstractTableModel {
                         buyDialog.setVisible(true);
                     }
                 });
+
+                if(rowItem.getQuantity() <= 0){
+                    buy_button.setEnabled(false);
+                }
                 return buy_button;
             default:
                 return "Error";

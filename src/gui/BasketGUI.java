@@ -47,6 +47,11 @@ public class BasketGUI {
 
         paymentReportBtn.addActionListener(new ReportButtonEvent(paymentReportOptions, paymentReports, paymentQueries, paymentCustomerParams));
 
+        DefaultComboBoxModel<String> customerReportModel = new DefaultComboBoxModel<String>(customerReports);
+        customerReportOptions.setModel(customerReportModel);
+
+        customerReportBtn.addActionListener(new ReportButtonEvent(customerReportOptions, customerReports, customerQueries, null));
+
         // Disable the cart and orders tab initially, since a user will not be logged in
         tabPane.setEnabledAt(2, false);
         tabPane.setEnabledAt(3, false);
@@ -413,7 +418,7 @@ public class BasketGUI {
 
         }
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(625, 540));
+        frame.setPreferredSize(new Dimension(650, 540));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -487,8 +492,45 @@ public class BasketGUI {
     private final JTableButtonMouseListener orderTableMouseListener =  new JTableButtonMouseListener(orderTable);
     private final JTableButtonMouseListener itemTableMouseListener =  new JTableButtonMouseListener(itemTable);
 
-    private static final String[] itemReports = {"Average item price.", "Get most expensive and least expensive item."};
-    private static final String[] itemQueries = {"Select avg(Price) as AveragePrices from Item", "SELECT * FROM ITEM ORDER BY PRICE DESC"};
+    private static final String[] itemReports = {
+            "How many of a specific item has been ordered?",
+            "Average item price.",
+            "Get most expensive and least expensive item.",
+            "What items did a specific customer order?",
+            "What kind of Electronics is in the Market Basket inventory?",
+            "How many of a specific item was ordered?",
+            "What is the top selling item?",
+            "What is the lowest selling item?",
+            "Query to find all items a customer ordered.",
+            "What kind of items do we sell?"
+
+    };
+    private static final String[] itemQueries = {
+            "Select ItemName,Count(ItemQuantity) as AmountSold from Order_Line_Item\n" +
+                    "Join Item on Order_Line_Item.ItemID = Item.ItemID\n" +
+                    "Where ItemName = 'Dell laptop'\n" +
+                    "Group by Itemname, Itemquantity",
+            "Select avg(Price) as AveragePrices from Item",
+            "SELECT * FROM ITEM ORDER BY PRICE DESC",
+            "Select Distinct Customers.CustomerID, ItemName From Item  Join Order_Line_Item on Item.ItemID = Order_Line_Item.ItemID Join Orders on Order_Line_Item.OrderID = Orders.OrderID Join Customers on Orders.CustomerID = Customers.CustomerID\n",
+            "Select * From Item\n" +
+                    "Where Category_Type = 'Electronics'",
+            "Select Distinct ItemName, ItemQuantity From Item Join Order_Line_Item on Item.ItemID = Order_Line_Item.ItemID",
+            "Select Item.Itemid, ItemName, MAX(ItemQuantity) as AmountSold From Item \n" +
+                    "Join Order_Line_Item on Item.ItemID = Order_Line_Item.ItemID \n" +
+                    "Group by ItemQuantity, itemname, item.itemid\n" +
+                    "HAVING MAX(ItemQuantity) > 6",
+            "Select Item.Itemid, ItemName, MIN(ItemQuantity) as AmountSold From Item \n" +
+                    "Join Order_Line_Item on Item.ItemID = Order_Line_Item.ItemID \n" +
+                    "Group by ItemQuantity, itemname, item.itemid\n" +
+                    "HAVING MAX(ItemQuantity) <= 1",
+            "Select Distinct Customers.CustomerID, ItemName from Item\n" +
+                    "Join Order_Line_Item on Item.ItemID = Order_Line_Item.ItemID \n" +
+                    "Join Orders on Order_Line_Item.OrderId = Orders.OrderId \n" +
+                    "Join Customers on Orders.CustomerID = Customers.CustomerID\n" +
+                    "Order by CustomerID asc",
+            "Select Distinct Category_Type from Item"
+    };
 
     private static final String[] orderReports = {
             "Number of orders per customer", "Number of orders by state",
@@ -609,7 +651,7 @@ public class BasketGUI {
                     "BALANCE, PAYMENTID\n" +
                     "\n" +
                     "ORDER BY PAYMENTID",
-            "", // 6 - query that displays all payments from an individual customer (not total)
+            "select firstname, lastname, paymentid, paymentamount from payment join customers on customers.customerid = payment.customerid", // 6 - query that displays all payments from an individual customer (not total)
             "SELECT DISTINCT PAYMENT.CUSTOMERID, (FIRSTNAME ||' '|| MIDDLEINIT|| ' '|| LASTNAME)\n" +
                     "\n" +
                     "AS FULL_NAME, COUNT(PAYMENTID) AS NUMBER_OF_PAYMENTS_MADE\n" +
@@ -617,9 +659,68 @@ public class BasketGUI {
                     "FROM PAYMENT JOIN CUSTOMERS ON PAYMENT.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
                     "\n" +
                     "GROUP BY PAYMENT.CUSTOMERID, (FIRSTNAME ||' '|| MIDDLEINIT|| ' '|| LASTNAME)",
-            "", // 8 - highest payment
-            "", // 9 - most used method of payment
-            "" // 10 - what dates payments are made
+            "SELECT DISTINCT PAYMENT.CUSTOMERID, (FIRSTNAME ||' '|| MIDDLEINIT|| ' '|| LASTNAME) AS FULL_NAME, MAX(PAYMENTAMOUNT) AS HIGHEST_PAYMENT\n" +
+                    "FROM PAYMENT JOIN CUSTOMERS ON PAYMENT.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
+                    "GROUP BY PAYMENT.CUSTOMERID, (FIRSTNAME ||' '|| MIDDLEINIT|| ' '|| LASTNAME)", // 8 - highest payment
+            "SELECT DISTINCT PAYMENTMETHOD, COUNT(*) AS NUM_OF_TIMES_USED\n" +
+                    "FROM PAYMENT JOIN CUSTOMERS ON PAYMENT.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
+                    "GROUP BY PAYMENTMETHOD\n" +
+                    "ORDER BY COUNT(*) DESC", // 9 - most used method of payment
+            "select firstname, lastname, paymentid, paymentdate from payment join customers on customers.customerid = payment.customerid" // 10 - what dates payments are made
+    };
+
+    private static final String[] customerReports = {
+            "What is the age demographic of our customers?",
+            "What is the regional demographic of our customers?",
+            "What is a specific customers balance?",
+            "What is the average amount spent by a specific customer across all of their orders?",
+            "How many of a specific category of items has a customer purchased?",
+            "Which customers may also be purchasing for their company?",
+            "List the customers who opt for email notifications on their purchases.",
+            "What payment methods have been used and how often?",
+            "Which customers DON’T have an account?",
+            "Which customers have a shipping address different than their billing address?"
+    };
+
+    private static final String[] customerQueries = {
+            "SELECT CASE\n" +
+                    "  WHEN AGE <= 18 THEN '0-18'\n" +
+                    "  WHEN AGE > 18 AND AGE <= 32 THEN '19-32'\n" +
+                    "  WHEN AGE > 32 AND AGE <= 51 THEN '33-51'\n" +
+                    "  WHEN AGE > 51 AND AGE <= 64 THEN '52-64'\n" +
+                    "  ELSE '65+'\n" +
+                    "END AS \"AGE RANGE\",\n" +
+                    "  COUNT(*) AS COUNT\n" +
+                    "FROM CUSTOMERS\n" +
+                    " \n" +
+                    "GROUP BY CASE\n" +
+                    "  WHEN AGE <= 18 THEN '0-18'\n" +
+                    "  WHEN AGE > 18 AND AGE <= 32 THEN '19-32'\n" +
+                    "  WHEN AGE > 32 AND AGE <= 51 THEN '33-51'\n" +
+                    "  WHEN AGE > 51 AND AGE <= 64 THEN '52-64'\n" +
+                    "  ELSE '65+'\n" +
+                    "END\n",
+            "SELECT COUNTRY, COUNT(COUNTRY) AS COUNT FROM ADDRESS\n" +
+                    "GROUP BY COUNTRY\n",
+            "SELECT CUSTOMERS.CUSTOMERID, FIRSTNAME, LASTNAME, SUM(BALANCE) FROM CUSTOMERS JOIN PAYMENT ON CUSTOMERS.CUSTOMERID = PAYMENT.CUSTOMERID\n" +
+                    "GROUP BY CUSTOMERS.CUSTOMERID, FIRSTNAME, LASTNAME",
+            "SELECT CUSTOMERS.CUSTOMERID, FIRSTNAME, LASTNAME, AVG(TOTALPRICE) FROM CUSTOMERS JOIN ORDERS ON CUSTOMERS.CUSTOMERID = ORDERS.CUSTOMERID\n" +
+                    "GROUP BY CUSTOMERS.CUSTOMERID, FIRSTNAME, LASTNAME",
+            "SELECT CUSTOMERS.CUSTOMERID, FIRSTNAME, LASTNAME, CATEGORY_TYPE, COUNT(CATEGORY_TYPE) FROM CUSTOMERS\n" +
+                    "JOIN ORDERS ON CUSTOMERS.CUSTOMERID = ORDERS.CUSTOMERID\n" +
+                    "JOIN ORDER_LINE_ITEM ON ORDERS.ORDERID = ORDER_LINE_ITEM.ORDERID\n" +
+                    "JOIN ITEM ON ORDER_LINE_ITEM.ITEMID = ITEM.ITEMID\n" +
+                    "GROUP BY CUSTOMERS.CUSTOMERID, CATEGORY_TYPE, FIRSTNAME, LASTNAME",
+            "SELECT CUSTOMERID, FIRSTNAME, LASTNAME, COMPANY FROM CUSTOMERS\n" +
+                    "WHERE COMPANY IS NOT NULL",
+            "SELECT CUSTOMERS.CUSTOMERID, FIRSTNAME, LASTNAME, ACCOUNT.RECEIVENOTIF FROM CUSTOMERS JOIN ACCOUNT ON CUSTOMERS.CUSTOMERID = ACCOUNT.CUSTOMERID\n" +
+                    "WHERE RECEIVENOTIF = 'y'",
+            "SELECT PAYMENTMETHOD, COUNT(PAYMENTMETHOD) FROM PAYMENT\n" +
+                    "GROUP BY PAYMENTMETHOD",
+            "SELECT CUSTOMERS.CUSTOMERID, ACCOUNT.CUSTOMERID AS ACCOUNTID FROM CUSTOMERS LEFT JOIN ACCOUNT ON ACCOUNT.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
+                    "WHERE ACCOUNT.CUSTOMERID IS NULL",
+            "SELECT FIRSTNAME, LASTNAME FROM CUSTOMERS JOIN ADDRESS ON ADDRESS.CUSTOMERID = CUSTOMERS.CUSTOMERID\n" +
+                    "WHERE ISSHIPPING = 'false'"
     };
 
     private static final boolean[] paymentCustomerParams = {
